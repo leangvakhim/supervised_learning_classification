@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>K-Nearest Neighbors (KNN) Visualization</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Smooth transitions for text content */
+        .fade-transition {
+            transition: opacity 0.3s ease-in-out;
+        }
+    </style>
+</head>
+
+<body class="bg-slate-50 min-h-screen font-sans text-slate-800 flex items-center justify-center p-4">
+
+    <div class="max-w-5xl w-full bg-white rounded-2xl shadow-xl overflow-hidden border border-slate-200">
+
+        <!-- Header -->
+        <div class="bg-slate-800 text-white p-6 text-center">
+            <h1 class="text-3xl font-bold tracking-wide">K-Nearest Neighbors (KNN)</h1>
+            <p class="text-slate-300 mt-2">An interactive step-by-step guide to how KNN classifies data</p>
+        </div>
+
+        <div class="p-6 md:p-8 flex flex-col md:flex-row gap-8 items-center">
+
+            <!-- Canvas Container -->
+            <div class="flex-1 w-full bg-slate-50 rounded-xl border-2 border-slate-100 p-2 shadow-inner">
+                <canvas id="knnCanvas" width="600" height="400"
+                    class="w-full h-auto rounded-lg cursor-crosshair"></canvas>
+            </div>
+
+            <!-- Content & Controls Container -->
+            <div class="flex-1 w-full flex flex-col h-full min-h-[350px] justify-between">
+
+                <div>
+                    <!-- Step Progress Indicator -->
+                    <div class="flex items-center gap-2 mb-6 text-sm font-semibold text-slate-400">
+                        <span id="stepCounter" class="bg-indigo-100 text-indigo-700 px-3 py-1 rounded-full">Step 1 of
+                            6</span>
+                    </div>
+
+                    <!-- Dynamic Content Area -->
+                    <div id="contentArea" class="fade-transition">
+                        <h2 id="stepTitle" class="text-2xl font-bold text-slate-800 mb-4">Title</h2>
+                        <p id="stepDescription" class="text-lg text-slate-600 leading-relaxed">Description goes here.
+                        </p>
+
+                        <!-- Equation Block (Hidden by default) -->
+                        <div id="equationBlock" class="hidden mt-6 bg-blue-50 border border-blue-200 p-5 rounded-xl">
+                            <p class="text-sm font-semibold text-blue-800 uppercase tracking-wider mb-2">Euclidean
+                                Distance Formula</p>
+                            <div
+                                class="text-center font-serif text-xl text-slate-800 flex items-center justify-center gap-3">
+                                <span>d =</span>
+                                <span>&radic;<span
+                                        class="border-t-[1.5px] border-slate-800 inline-block pt-1 ml-1">(x&#8322; -
+                                        x&#8321;)&sup2; + (y&#8322; - y&#8321;)&sup2;</span></span>
+                            </div>
+                            <p class="text-xs text-blue-600 mt-3">Where (x&#8321;, y&#8321;) is our new point, and
+                                (x&#8322;, y&#8322;) is an existing dataset point.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Navigation Buttons -->
+                <div class="flex gap-4 mt-8 border-t border-slate-100 pt-6">
+                    <button id="btnPrev"
+                        class="flex-1 bg-white border-2 border-slate-200 text-slate-600 font-semibold py-3 px-6 rounded-xl hover:bg-slate-50 hover:text-slate-800 transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd"
+                                d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z"
+                                clip-rule="evenodd" />
+                        </svg>
+                        Back
+                    </button>
+                    <button id="btnNext"
+                        class="flex-1 bg-indigo-600 text-white font-semibold py-3 px-6 rounded-xl hover:bg-indigo-700 hover:shadow-lg hover:shadow-indigo-200 transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2">
+                        Next Step
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd"
+                                d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z"
+                                clip-rule="evenodd" />
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="../js/knn.js"></script>
+</body>
+
+</html>

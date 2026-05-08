@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Classification Evaluation Metrics</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Simple fade-in animation for step transitions */
+        .fade-in {
+            animation: fadeIn 0.4s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+</head>
+
+<body class="bg-slate-50 min-h-screen flex items-center justify-center p-4 font-sans text-slate-800">
+
+    <!-- Main Container -->
+    <div
+        class="bg-white max-w-3xl w-full rounded-2xl shadow-xl border border-slate-100 overflow-hidden flex flex-col h-[700px]">
+
+        <!-- Header & Progress -->
+        <div class="px-8 pt-8 pb-4 border-b border-slate-100">
+            <h1 class="text-2xl sm:text-3xl font-bold text-slate-900 mb-2">Classification Metrics Guide</h1>
+            <p class="text-slate-500 text-sm mb-4">Understanding how we measure Machine Learning models.</p>
+
+            <!-- Progress Bar -->
+            <div class="w-full bg-slate-100 rounded-full h-2.5">
+                <div id="progress-bar" class="bg-blue-600 h-2.5 rounded-full transition-all duration-300 ease-out"
+                    style="width: 14%"></div>
+            </div>
+            <div class="flex justify-between text-xs text-slate-400 mt-2">
+                <span id="step-indicator">Step 1 of 7</span>
+            </div>
+        </div>
+
+        <!-- Dynamic Content Area -->
+        <div id="content-area" class="flex-grow p-8 overflow-y-auto fade-in">
+            <!-- Content gets injected here via JavaScript -->
+        </div>
+
+        <!-- Footer / Navigation -->
+        <div class="px-8 py-4 bg-slate-50 border-t border-slate-100 flex justify-between items-center">
+            <button id="btn-prev"
+                class="px-6 py-2.5 rounded-lg font-medium text-slate-600 bg-white border border-slate-200 hover:bg-slate-100 hover:text-slate-900 transition-colors disabled:opacity-40 disabled:cursor-not-allowed">
+                &larr; Back
+            </button>
+            <button id="btn-next"
+                class="px-6 py-2.5 rounded-lg font-medium text-white bg-blue-600 hover:bg-blue-700 shadow-sm transition-colors disabled:opacity-40 disabled:cursor-not-allowed">
+                Next Step &rarr;
+            </button>
+        </div>
+    </div>
+
+    <script src="../js/classification_evaluation_metrics.js"></script>
+</body>
+
+</html>
