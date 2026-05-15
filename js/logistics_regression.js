@@ -1,346 +1,455 @@
-// --- DATA & CONFIGURATION ---
+// --- DATA & CONTENT ---
+
+// Mock dataset: Hours studied (x) vs Exam Result (y) [0 = Fail, 1 = Pass]
+const studentData = [
+    { hours: 1, passed: 0 },
+    { hours: 1.5, passed: 0 },
+    { hours: 2.5, passed: 0 },
+    { hours: 3, passed: 0 },
+    { hours: 4, passed: 0 },
+    { hours: 5.5, passed: 1 },
+    { hours: 6, passed: 1 },
+    { hours: 7, passed: 1 },
+    { hours: 8.5, passed: 1 },
+    { hours: 9, passed: 1 },
+];
+
 const steps = [
     {
-        shortTitle: "The Problem",
-        title: "Linear Regression Fails for Classification",
-        desc: "Imagine we want to predict if an email is spam (1) or not (0) based on word count. A straight line (Linear Regression) shoots past 1 and drops below 0. But probabilities must stay between 0% and 100% (0 and 1)!",
-        action: "drawLinear"
+        title: "1. The Classification Problem",
+        description: `
+            <p>In Machine Learning, <b>Supervised Learning</b> means we train a model using examples that already have the answers (labels).</p>
+            <p><b>Classification</b> is a type of supervised learning where we want to predict a category (a discrete value). The simplest form is <b>Binary Classification</b>, where there are only two outcomes.</p>
+            <div class="bg-blue-50 border-l-4 border-blue-500 p-3 rounded-r-md mt-4">
+                <strong class="text-blue-800">Real World Example:</strong>
+                <p class="text-blue-900 mt-1">Imagine predicting if a student will <b>Pass (1)</b> or <b>Fail (0)</b> an exam based on how many hours they studied.</p>
+            </div>
+            <p class="mt-4">Look at the graph. The x-axis is Hours Studied, and the y-axis is the Result (0 or 1).</p>
+        `,
+        latex: `$$ y \\in \\{0, 1\\} $$`,
+        vizMode: 'data_only'
     },
     {
-        shortTitle: "The Sigmoid",
-        title: "The Magic 'S' Curve",
-        desc: "To fix this, we pass the straight line through a 'Sigmoid Function'. This mathematical magic perfectly squishes our outputs so they never go above 1 or below 0.",
-        action: "drawSigmoid"
+        title: "2. Why Linear Regression Fails",
+        description: `
+            <p>Our goal is to draw a line that separates the passes from the fails. What if we use standard <b>Linear Regression</b>?</p>
+            <p>Linear regression fits a straight line: $\\hat{y} = wx + b$.</p>
+            <p><b>The Problem:</b> Probabilities must be between 0 and 1 (or 0% and 100%). A straight line extends infinitely. As you can see on the graph, for someone who studied 9 hours, the model predicts a value greater than 1. For 0 hours, it predicts less than 0. This doesn't make sense for classification!</p>
+        `,
+        latex: `$$ \\text{Linear Model: } \\hat{y} = wx + b $$<br>$$ \\text{Issue: } \\hat{y} \\notin [0, 1] $$`,
+        vizMode: 'linear'
     },
     {
-        shortTitle: "The Equation",
-        title: "The Math Behind the Curve",
-        desc: "Here is the actual equation that makes the S-Curve possible. It takes the output of our linear equation (mx + b) and turns it into a probability.",
-        action: "showEquation"
+        title: "3. The Magic of the Sigmoid Function",
+        description: `
+            <p>To fix this, we need a mathematical function that takes any number (from $-\\infty$ to $+\\infty$) and "squashes" it to be strictly between <b>0 and 1</b>.</p>
+            <p>Enter the <b>Sigmoid Function</b> (or Logistic Function), denoted by $\\sigma$ (sigma).</p>
+            <p>No matter how large or small the input $z$ is, the output will curve gracefully and never cross 0 or 1, forming a beautiful 'S' shape.</p>
+        `,
+        latex: `$$ \\text{Sigmoid: } \\sigma(z) = \\frac{1}{1 + e^{-z}} $$`,
+        vizMode: 'pure_sigmoid'
     },
     {
-        shortTitle: "The Threshold",
-        title: "Making a Decision",
-        desc: "Logistic Regression outputs a probability (e.g., 0.85). To make a final Yes/No decision, we draw a 'Threshold' line, usually at 0.5 (50%). Anything above is Class 1, anything below is Class 0.",
-        action: "drawThreshold"
+        title: "4. Logistic Regression Formula",
+        description: `
+            <p>Now we combine them! We take the linear equation ($wx + b$) and pass it <i>through</i> the Sigmoid function.</p>
+            <p>Instead of predicting the exact class, Logistic Regression predicts the <b>probability</b> that the answer is 1 (Pass).</p>
+            <p>If $x$ is 6 hours, the output $\\hat{y}$ might be $0.85$. This means the model thinks there is an 85% chance the student passes.</p>
+        `,
+        latex: `$$ \\text{Model: } \\hat{y} = \\sigma(wx + b) $$ <br> $$ \\hat{y} = \\frac{1}{1 + e^{-(wx + b)}} $$`,
+        vizMode: 'logistic_curve'
     },
     {
-        shortTitle: "Playground",
-        title: "Try it Yourself",
-        desc: "Move the slider to change the input value. Watch how the probability changes along the S-curve, and see how the final classification updates based on the 0.5 threshold.",
-        action: "drawInteractive"
+        title: "5. The Decision Boundary",
+        description: `
+            <p>We have a probability between 0 and 1, but we need a final Pass/Fail answer. We do this by setting a <b>Threshold</b>, usually at $0.5$ (50%).</p>
+            <ul class="list-disc pl-5 mt-2 space-y-1">
+                <li>If $\\hat{y} \\ge 0.5$, predict <b>Pass (1)</b></li>
+                <li>If $\\hat{y} &lt; 0.5$, predict <b>Fail (0)</b></li>
+            </ul>
+            <p class="mt-4">The vertical dashed line shows the <b>Decision Boundary</b> on the x-axis. Any student studying more than this threshold is predicted to pass.</p>
+        `,
+        latex: `$$ \\text{Predict } 1 \\text{ if } P(y=1|x) \\ge 0.5 $$ $$ \\text{Predict } 0 \\text{ if } P(y=1|x) &lt; 0.5 $$`,
+        vizMode: 'decision_boundary'
+    },
+    {
+        title: "6. Interactive Experiment",
+        description: `
+            <p>Now it's your turn! Adjust the weights and bias to see how they affect the Logistic Regression curve.</p>
+            <ul class="list-disc pl-5 mt-2 space-y-2">
+                <li><b>Weight ($w$):</b> Controls how steep the 'S' curve is. Higher weight means a sharper transition.</li>
+                <li><b>Bias ($b$):</b> Shifts the curve left or right, changing where the 50% decision boundary lies.</li>
+            </ul>
+            <p class="mt-4 font-semibold text-blue-700">Try to fit the curve to the student data points as best as you can!</p>
+        `,
+        latex: `$$ \\hat{y} = \\frac{1}{1 + e^{-(\\mathbf{w}x + \\mathbf{b})}} $$`,
+        vizMode: 'interactive'
+    },
+    {
+        title: "7. Doing it in Python (scikit-learn)",
+        description: `
+        <p>In the real world, you don't adjust sliders manually! We use Python libraries like <b>scikit-learn</b> to find the perfect formula instantly.</p>
+
+        <pre class="bg-slate-800 text-slate-50 p-4 rounded-xl mt-4 mb-4 overflow-x-auto text-sm font-mono leading-relaxed shadow-inner whitespace-pre"><code><span class="text-pink-400">from</span> sklearn.linear_model <span class="text-pink-400">import</span> LogisticRegression
+<span class="text-pink-400">import</span> numpy <span class="text-pink-400">as</span> np
+
+<span class="text-slate-400"># 1. Prepare Data</span>
+X = np.array([[1], [3], [4], [6], [7], [9]]) <span class="text-slate-400"># Hours studied</span>
+y = np.array([0, 0, 0, 1, 1, 1])             <span class="text-slate-400"># 0 = Fail, 1 = Pass</span>
+
+<span class="text-slate-400"># 2. Create the model</span>
+model = LogisticRegression()
+
+<span class="text-slate-400"># 3. Train the model (Math happens here!)</span>
+model.fit(X, y)
+
+<span class="text-slate-400"># 4. Predict for a student who studied 6 hours</span>
+prediction = model.predict([[6]])
+
+<span class="text-blue-300">print</span>(<span class="text-yellow-300">f"Prediction: {prediction}"</span>) <span class="text-slate-400"># Result: [1] (Pass)</span></code></pre>
+
+        <ul class="list-disc pl-5 mt-2 space-y-2">
+            <li><b>model.fit(X, y):</b> This is the most important step! The algorithm automatically looks at the data and finds the absolute best <b>Weight ($w$)</b> and <b>Bias ($b$)</b> to fit the S-curve.</li>
+            <li><b>model.predict():</b> Once trained, the model uses the threshold (usually 0.5) to instantly tell us if a new data point falls on the Pass or Fail side.</li>
+        </ul>
+    `,
+        latex: `$$ \\text{scikit-learn } \\texttt{.fit()} \\rightarrow \\text{finds best } w, b $$`,
+        vizMode: 'decision_boundary'
     }
 ];
 
+// --- APP STATE ---
 let currentStep = 0;
-let interactiveValue = 0;
-let animationFrameId;
+let canvas, ctx;
+let interactiveW = 1.6;
+let interactiveB = -7;
 
 // --- DOM ELEMENTS ---
-const titleEl = document.getElementById('content-title');
-const descEl = document.getElementById('content-desc');
-const counterEl = document.getElementById('step-counter');
-const progressBar = document.getElementById('progress-bar');
-const btnPrev = document.getElementById('btn-prev');
+const elTitle = document.getElementById('step-title');
+const elDesc = document.getElementById('step-description');
+const elMath = document.getElementById('step-math');
+const elCounter = document.getElementById('step-counter');
+const elProgress = document.getElementById('progress-bar');
 const btnNext = document.getElementById('btn-next');
-const stepTitlesEl = document.getElementById('step-titles');
-const dotIndicatorsEl = document.getElementById('dot-indicators');
+const btnBack = document.getElementById('btn-back');
+const controlsArea = document.getElementById('interactive-controls');
+const sliderW = document.getElementById('slider-w');
+const sliderB = document.getElementById('slider-b');
+const valW = document.getElementById('val-w');
+const valB = document.getElementById('val-b');
 
-const canvas = document.getElementById('viz-canvas');
-const ctx = canvas.getContext('2d');
-const eqContainer = document.getElementById('equation-container');
-const uiContainer = document.getElementById('interactive-ui');
-const badgeContainer = document.getElementById('prediction-badge');
-const xSlider = document.getElementById('x-slider');
-const xValueText = document.getElementById('x-value');
-const predProbText = document.getElementById('pred-prob');
-const predClassText = document.getElementById('pred-class');
+// --- INITIALIZATION ---
+function initApp() {
+    canvas = document.getElementById('vizCanvas');
+    ctx = canvas.getContext('2d');
 
-// Setup Steps UI
-steps.forEach((step, i) => {
-    // Top titles
-    const titleSpan = document.createElement('span');
-    titleSpan.className = `flex-1 text-center ${i === 0 ? 'text-blue-600' : ''}`;
-    titleSpan.id = `title-span-${i}`;
-    titleSpan.textContent = step.shortTitle;
-    stepTitlesEl.appendChild(titleSpan);
+    // Resize canvas to physical pixels to avoid blurriness
+    resizeCanvas();
+    window.addEventListener('resize', () => {
+        resizeCanvas();
+        drawVisualization();
+    });
 
-    // Bottom dots
-    const dot = document.createElement('div');
-    dot.className = `w-2 h-2 rounded-full transition-colors ${i === 0 ? 'bg-blue-600' : 'bg-slate-200'}`;
-    dot.id = `dot-${i}`;
-    dotIndicatorsEl.appendChild(dot);
-});
+    // Event Listeners
+    btnNext.addEventListener('click', () => changeStep(1));
+    btnBack.addEventListener('click', () => changeStep(-1));
 
-// --- DRAWING HELPER FUNCTIONS ---
+    sliderW.addEventListener('input', (e) => {
+        interactiveW = parseFloat(e.target.value);
+        valW.textContent = interactiveW.toFixed(1);
+        drawVisualization();
+        updateMathJaxInteractive();
+    });
 
-function clearCanvas() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    sliderB.addEventListener('input', (e) => {
+        interactiveB = parseFloat(e.target.value);
+        valB.textContent = interactiveB.toFixed(1);
+        drawVisualization();
+        updateMathJaxInteractive();
+    });
+
+    renderStep();
+}
+
+function resizeCanvas() {
+    const rect = canvas.parentElement.getBoundingClientRect();
+    // Set actual internal dimensions
+    canvas.width = rect.width;
+    canvas.height = rect.height;
+}
+
+// --- LOGIC ---
+function changeStep(dir) {
+    currentStep += dir;
+    if (currentStep < 0) currentStep = 0;
+    if (currentStep >= steps.length) currentStep = steps.length - 1;
+
+    // Temporarily hide math elements for smooth transition
+    document.body.classList.remove('math-ready');
+    setTimeout(renderStep, 50); // slight delay to allow fade out
+}
+
+function renderStep() {
+    const step = steps[currentStep];
+
+    // Update UI text
+    elTitle.textContent = step.title;
+    elDesc.innerHTML = step.description;
+
+    // Update Progress
+    elCounter.textContent = `Step ${currentStep + 1} of ${steps.length}`;
+    elProgress.style.width = `${((currentStep) / (steps.length - 1)) * 100}%`;
+
+    // Button states
+    btnBack.disabled = currentStep === 0;
+    btnNext.disabled = currentStep === steps.length - 1;
+
+    // Interactive controls visibility
+    if (step.vizMode === 'interactive') {
+        controlsArea.classList.remove('hidden');
+        sliderW.value = interactiveW;
+        sliderB.value = interactiveB;
+        updateMathJaxInteractive();
+    } else {
+        controlsArea.classList.add('hidden');
+        // Standard MathJax rendering
+        elMath.innerHTML = step.latex;
+        renderMathJax();
+    }
+
+    // Recalculate canvas size in case the layout changed (like controls appearing)
+    resizeCanvas();
+    drawVisualization();
+}
+
+// --- MATHJAX RENDERING ---
+function renderMathJax() {
+    if (window.mathJaxReady) {
+        // Ensure MathJax scans both the description (for inline text) and the main math block
+        MathJax.typesetClear([elDesc, elMath]);
+        MathJax.typesetPromise([elDesc, elMath]).then(() => {
+            // Fade it back in after rendering is complete
+            document.body.classList.add('math-ready');
+        });
+    }
+}
+
+function updateMathJaxInteractive() {
+    let sign = interactiveB >= 0 ? '+' : '-';
+    let latexStr = `$$ \\hat{y} = \\frac{1}{1 + e^{-(${interactiveW.toFixed(1)}x ${sign} ${Math.abs(interactiveB).toFixed(1)})}} $$`;
+    elMath.innerHTML = latexStr;
+    renderMathJax();
+}
+
+// --- CANVAS DRAWING FUNCTIONS ---
+
+// Helper: Map data coordinates (X:0-10, Y:-0.2 to 1.2) to Canvas pixels
+function mapX(x) {
+    const padding = 40;
+    return padding + (x / 10) * (canvas.width - padding * 2);
+}
+
+function mapY(y) {
+    const padding = 40;
+    // Invert Y because canvas Y goes down
+    // Range is -0.2 to 1.2 to give space above 1 and below 0
+    const yRange = 1.4;
+    const yOffset = 0.2;
+    return canvas.height - padding - ((y + yOffset) / yRange) * (canvas.height - padding * 2);
 }
 
 function drawAxes() {
-    const width = canvas.width;
-    const height = canvas.height;
-    const originX = width / 2;
-    const originY = height - 40;
-
     ctx.beginPath();
-    ctx.strokeStyle = '#e2e8f0'; // slate-200
+    ctx.strokeStyle = '#cbd5e1'; // slate-300
     ctx.lineWidth = 2;
 
-    // X Axis
-    ctx.moveTo(40, originY);
-    ctx.lineTo(width - 40, originY);
+    // X Axis (at y=0)
+    ctx.moveTo(mapX(0), mapY(0));
+    ctx.lineTo(mapX(10.5), mapY(0));
 
-    // Y Axis
-    ctx.moveTo(originX, 20);
-    ctx.lineTo(originX, height - 20);
+    // Y Axis (at x=0)
+    ctx.moveTo(mapX(0), mapY(-0.2));
+    ctx.lineTo(mapX(0), mapY(1.2));
     ctx.stroke();
 
-    // Y Axis Labels (0 and 1)
+    // Labels
     ctx.fillStyle = '#64748b'; // slate-500
-    ctx.font = '14px Arial';
-    ctx.textAlign = 'right';
-    ctx.fillText('0', originX - 10, originY + 5);
-    ctx.fillText('1', originX - 10, 45);
+    ctx.font = '12px sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'top';
 
-    // Dashed lines for boundaries
+    // X-axis ticks (Hours)
+    for (let i = 0; i <= 10; i += 2) {
+        ctx.fillText(i, mapX(i), mapY(0) + 8);
+        // tick mark
+        ctx.beginPath();
+        ctx.moveTo(mapX(i), mapY(0));
+        ctx.lineTo(mapX(i), mapY(0) + 4);
+        ctx.stroke();
+    }
+    ctx.fillText("Hours Studied", mapX(5), mapY(0) + 25);
+
+    // Y-axis ticks (Probability/Class)
+    ctx.textAlign = 'right';
+    ctx.textBaseline = 'middle';
+
+    [0, 0.5, 1].forEach(tick => {
+        ctx.fillText(tick, mapX(0) - 8, mapY(tick));
+        ctx.beginPath();
+        ctx.moveTo(mapX(0) - 4, mapY(tick));
+        ctx.lineTo(mapX(0), mapY(tick));
+        ctx.stroke();
+    });
+
+    ctx.save();
+    ctx.translate(mapX(0) - 25, mapY(0.5));
+    ctx.rotate(-Math.PI / 2);
+    ctx.textAlign = 'center';
+    ctx.fillText("Result (Fail/Pass)", 0, 0);
+    ctx.restore();
+
+    // Horizontal reference lines for 1 and 0
     ctx.beginPath();
+    ctx.strokeStyle = '#e2e8f0'; // slate-200
     ctx.setLineDash([5, 5]);
-    ctx.strokeStyle = '#f1f5f9';
-    ctx.moveTo(40, 40); // y=1 line
-    ctx.lineTo(width - 40, 40);
+    ctx.moveTo(mapX(0), mapY(1));
+    ctx.lineTo(mapX(10), mapY(1));
     ctx.stroke();
     ctx.setLineDash([]);
 }
 
 function drawDataPoints() {
-    const width = canvas.width;
-    const originX = width / 2;
-
-    ctx.fillStyle = '#f59e0b'; // amber-500 (Class 0)
-    for (let i = -8; i < -1; i += 1.5) {
+    studentData.forEach(pt => {
         ctx.beginPath();
-        ctx.arc(originX + i * 30, canvas.height - 40, 6, 0, Math.PI * 2);
-        ctx.fill();
-    }
+        ctx.arc(mapX(pt.hours), mapY(pt.passed), 6, 0, Math.PI * 2);
 
-    ctx.fillStyle = '#10b981'; // emerald-500 (Class 1)
-    for (let i = 1; i < 8; i += 1.5) {
-        ctx.beginPath();
-        ctx.arc(originX + i * 30, 40, 6, 0, Math.PI * 2);
-        ctx.fill();
-    }
-}
-
-// --- SPECIFIC STEP RENDERERS ---
-
-function drawLinear() {
-    clearCanvas();
-    drawAxes();
-    drawDataPoints();
-
-    const width = canvas.width;
-    const height = canvas.height;
-    const originX = width / 2;
-    const originY = height - 40;
-
-    // Draw Linear Line
-    ctx.beginPath();
-    ctx.strokeStyle = '#ef4444'; // red-500
-    ctx.lineWidth = 3;
-    // Line equation roughly y = mx + c mapping to canvas
-    ctx.moveTo(originX - 150, originY + 50); // Starts below 0
-    ctx.lineTo(originX + 150, -10); // Shoots past 1
-    ctx.stroke();
-
-    // Highlight error zones
-    ctx.fillStyle = 'rgba(239, 68, 68, 0.1)';
-    ctx.fillRect(40, 0, width - 80, 40); // Above 1 zone
-    ctx.fillRect(40, originY, width - 80, height - originY); // Below 0 zone
-
-    // Annotations
-    ctx.fillStyle = '#ef4444';
-    ctx.font = 'bold 14px Arial';
-    ctx.textAlign = 'center';
-    ctx.fillText("Line goes above 1! (Prob > 100%?)", originX + 200, 30);
-    ctx.fillText("Line drops below 0! (Prob < 0%?)", originX - 200, originY + 30);
-}
-
-function drawSigmoid(interactiveX = null, showThreshold = false) {
-    clearCanvas();
-    drawAxes();
-
-    if (!interactiveX) drawDataPoints();
-
-    const width = canvas.width;
-    const height = canvas.height;
-    const originX = width / 2;
-    const originY = height - 40;
-    const scaleX = 30; // Pixel per unit X
-    const scaleY = originY - 40; // Pixel distance between y=0 and y=1
-
-    // Draw Threshold Line
-    if (showThreshold || interactiveX !== null) {
-        ctx.beginPath();
-        ctx.setLineDash([8, 6]);
-        ctx.strokeStyle = '#94a3b8'; // slate-400
-        ctx.lineWidth = 2;
-        ctx.moveTo(40, originY - (scaleY * 0.5));
-        ctx.lineTo(width - 40, originY - (scaleY * 0.5));
-        ctx.stroke();
-        ctx.setLineDash([]);
-
-        if (showThreshold && interactiveX === null) {
-            ctx.fillStyle = '#64748b';
-            ctx.font = 'bold 14px Arial';
-            ctx.textAlign = 'left';
-            ctx.fillText("Threshold (0.5)", width - 150, originY - (scaleY * 0.5) - 10);
+        if (pt.passed === 1) {
+            ctx.fillStyle = '#22c55e'; // green-500
+            ctx.strokeStyle = '#16a34a'; // green-600
+        } else {
+            ctx.fillStyle = '#ef4444'; // red-500
+            ctx.strokeStyle = '#dc2626'; // red-600
         }
-    }
 
-    // Draw Sigmoid Curve
+        ctx.fill();
+        ctx.lineWidth = 1;
+        ctx.stroke();
+    });
+}
+
+function drawLineFunction(w, b, color) {
     ctx.beginPath();
-    ctx.strokeStyle = '#2563eb'; // blue-600
+    ctx.strokeStyle = color;
+    ctx.lineWidth = 3;
+
+    // Draw line across visible X range
+    let xStart = 0;
+    let yStart = w * xStart + b;
+
+    let xEnd = 10;
+    let yEnd = w * xEnd + b;
+
+    ctx.moveTo(mapX(xStart), mapY(yStart));
+    ctx.lineTo(mapX(xEnd), mapY(yEnd));
+    ctx.stroke();
+}
+
+function drawSigmoidFunction(w, b, color) {
+    ctx.beginPath();
+    ctx.strokeStyle = color;
     ctx.lineWidth = 4;
 
-    for (let px = 40; px <= width - 40; px++) {
-        // Convert pixel X to math X
-        let mathX = (px - originX) / scaleX;
-        // Sigmoid formula
-        let mathY = 1 / (1 + Math.exp(-mathX));
-        // Convert math Y to pixel Y
-        let py = originY - (mathY * scaleY);
+    for (let x = 0; x <= 10; x += 0.1) {
+        let z = (w * x) + b;
+        let y = 1 / (1 + Math.exp(-z));
 
-        if (px === 40) ctx.moveTo(px, py);
-        else ctx.lineTo(px, py);
-    }
-    ctx.stroke();
-
-    // Draw Interactive Dot
-    if (interactiveX !== null) {
-        let mathY = 1 / (1 + Math.exp(-interactiveX));
-        let px = originX + (interactiveX * scaleX);
-        let py = originY - (mathY * scaleY);
-
-        // Draw projection lines
-        ctx.beginPath();
-        ctx.setLineDash([4, 4]);
-        ctx.strokeStyle = '#cbd5e1';
-        ctx.moveTo(px, originY);
-        ctx.lineTo(px, py);
-        ctx.lineTo(originX, py);
-        ctx.stroke();
-        ctx.setLineDash([]);
-
-        // Draw Dot
-        ctx.beginPath();
-        ctx.arc(px, py, 8, 0, Math.PI * 2);
-        ctx.fillStyle = mathY >= 0.5 ? '#10b981' : '#f59e0b';
-        ctx.fill();
-        ctx.strokeStyle = '#fff';
-        ctx.lineWidth = 2;
-        ctx.stroke();
-
-        // Update Badges
-        predProbText.textContent = (mathY * 100).toFixed(1) + '%';
-        if (mathY >= 0.5) {
-            predClassText.textContent = 'Class: 1 (Yes)';
-            predClassText.className = 'text-sm font-semibold mt-1 px-2 py-1 rounded text-center bg-emerald-100 text-emerald-700';
+        if (x === 0) {
+            ctx.moveTo(mapX(x), mapY(y));
         } else {
-            predClassText.textContent = 'Class: 0 (No)';
-            predClassText.className = 'text-sm font-semibold mt-1 px-2 py-1 rounded text-center bg-amber-100 text-amber-700';
+            ctx.lineTo(mapX(x), mapY(y));
         }
     }
+    ctx.stroke();
 }
 
-// --- CONTROLLER ---
+function drawVisualization() {
+    if (!canvas || !ctx) return;
+    const mode = steps[currentStep].vizMode;
 
-function updateUI() {
-    const step = steps[currentStep];
+    // Clear canvas
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    // Text updates with fade animation
-    titleEl.classList.remove('fade-in');
-    descEl.classList.remove('fade-in');
-    void titleEl.offsetWidth; // trigger reflow
-    titleEl.textContent = step.title;
-    descEl.textContent = step.desc;
-    titleEl.classList.add('fade-in');
-    descEl.classList.add('fade-in');
+    drawAxes();
 
-    // Progress tracking updates
-    counterEl.textContent = `Step ${currentStep + 1} of ${steps.length}`;
-    progressBar.style.width = `${((currentStep + 1) / steps.length) * 100}%`;
+    const idealW = 1.6;
+    const idealB = -7;
 
-    // Update labels & dots
-    for (let i = 0; i < steps.length; i++) {
-        document.getElementById(`title-span-${i}`).className = `flex-1 text-center transition-colors text-sm ${i <= currentStep ? 'text-blue-600 font-semibold' : 'text-slate-400 font-medium'}`;
-        document.getElementById(`dot-${i}`).className = `w-2 h-2 rounded-full transition-colors ${i <= currentStep ? 'bg-blue-600' : 'bg-slate-200'}`;
-    }
+    switch (mode) {
+        case 'data_only':
+            drawDataPoints();
+            break;
+        case 'linear':
+            // Linear Regression attempt: y = 0.12x - 0.1 (approx fit)
+            drawLineFunction(0.13, -0.15, '#ef4444');
+            drawDataPoints();
+            break;
+        case 'pure_sigmoid':
+            // Draw a centered sigmoid (w=1, b=-5 so center is at x=5)
+            drawSigmoidFunction(1.5, -7.5, '#3b82f6');
+            break;
+        case 'logistic_curve':
+            drawSigmoidFunction(idealW, idealB, '#3b82f6');
+            drawDataPoints();
+            break;
+        case 'decision_boundary':
+            drawSigmoidFunction(idealW, idealB, '#93c5fd'); // Lighter blue
+            drawDataPoints();
 
-    // Button states
-    btnPrev.disabled = currentStep === 0;
-    if (currentStep === steps.length - 1) {
-        btnNext.innerHTML = `Finish <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>`;
-        btnNext.classList.replace('bg-blue-600', 'bg-emerald-600');
-        btnNext.classList.replace('hover:bg-blue-700', 'hover:bg-emerald-700');
-    } else {
-        btnNext.innerHTML = `Next Step <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>`;
-        btnNext.classList.replace('bg-emerald-600', 'bg-blue-600');
-        btnNext.classList.replace('hover:bg-emerald-700', 'hover:bg-blue-700');
-    }
+            // Threshold horizontal line
+            ctx.beginPath();
+            ctx.strokeStyle = '#f59e0b'; // amber-500
+            ctx.setLineDash([4, 4]);
+            ctx.lineWidth = 2;
+            ctx.moveTo(mapX(0), mapY(0.5));
+            ctx.lineTo(mapX(10), mapY(0.5));
+            ctx.stroke();
+            ctx.setLineDash([]);
 
-    // View management
-    canvas.style.display = 'block';
-    eqContainer.classList.add('hidden');
-    uiContainer.classList.add('hidden');
-    badgeContainer.classList.add('hidden');
+            // Boundary vertical line (where w*x+b = 0 -> x = -b/w)
+            let decisionX = -idealB / idealW;
+            ctx.beginPath();
+            ctx.strokeStyle = '#3b82f6'; // blue-500
+            ctx.setLineDash([4, 4]);
+            ctx.lineWidth = 2;
+            ctx.moveTo(mapX(decisionX), mapY(-0.2));
+            ctx.lineTo(mapX(decisionX), mapY(1.2));
+            ctx.stroke();
+            ctx.setLineDash([]);
 
-    // Execute specific step action
-    if (step.action === 'drawLinear') {
-        drawLinear();
-    } else if (step.action === 'drawSigmoid') {
-        drawSigmoid();
-    } else if (step.action === 'showEquation') {
-        canvas.style.display = 'none';
-        eqContainer.classList.remove('hidden');
-    } else if (step.action === 'drawThreshold') {
-        drawSigmoid(null, true);
-    } else if (step.action === 'drawInteractive') {
-        uiContainer.classList.remove('hidden');
-        badgeContainer.classList.remove('hidden');
-        drawSigmoid(interactiveValue, true);
+            // Text for boundary
+            ctx.fillStyle = '#1e3a8a';
+            ctx.font = 'bold 12px sans-serif';
+            ctx.textAlign = 'left';
+            ctx.fillText("Decision Boundary", mapX(decisionX) + 5, mapY(0.8));
+            break;
+        case 'interactive':
+            drawDataPoints();
+            drawSigmoidFunction(interactiveW, interactiveB, '#2563eb'); // blue-600
+
+            // Real-time decision boundary
+            if (interactiveW !== 0) {
+                let dynamicDecisionX = -interactiveB / interactiveW;
+                if (dynamicDecisionX >= 0 && dynamicDecisionX <= 10) {
+                    ctx.beginPath();
+                    ctx.strokeStyle = '#94a3b8'; // slate-400
+                    ctx.setLineDash([4, 4]);
+                    ctx.lineWidth = 1;
+                    ctx.moveTo(mapX(dynamicDecisionX), mapY(0));
+                    ctx.lineTo(mapX(dynamicDecisionX), mapY(1));
+                    ctx.stroke();
+                    ctx.setLineDash([]);
+                }
+            }
+            break;
     }
 }
-
-// --- EVENT LISTENERS ---
-
-btnNext.addEventListener('click', () => {
-    if (currentStep < steps.length - 1) {
-        currentStep++;
-        updateUI();
-    } else {
-        currentStep.disabled = true;
-        // Restart on finish
-        // currentStep = 0;
-        // updateUI();
-    }
-});
-
-btnPrev.addEventListener('click', () => {
-    if (currentStep > 0) {
-        currentStep--;
-        updateUI();
-    }
-});
-
-xSlider.addEventListener('input', (e) => {
-    interactiveValue = parseFloat(e.target.value);
-    xValueText.textContent = interactiveValue.toFixed(1);
-    if (steps[currentStep].action === 'drawInteractive') {
-        drawSigmoid(interactiveValue, true);
-    }
-});
-
-// Initialize
-updateUI();

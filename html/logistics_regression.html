@@ -4,153 +4,137 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Interactive Logistic Regression</title>
+    <title>Logistic Regression Interactive Guide</title>
+
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- MathJax for LaTeX rendering -->
+    <script>
+        MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']]
+            },
+            startup: {
+                pageReady: () => {
+                    return MathJax.startup.defaultPageReady().then(() => {
+                        window.mathJaxReady = true;
+                        initApp(); // Start app only after MathJax is ready
+                    });
+                }
+            }
+        };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
     <style>
-        .fade-in {
-            animation: fadeIn 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        canvas {
+            touch-action: none;
+            /* Prevent scrolling when interacting with canvas */
         }
 
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(10px);
-            }
-
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+        /* Custom scrollbar for math container if it overflows */
+        .math-scrollbar::-webkit-scrollbar {
+            height: 6px;
         }
 
-        /* Math Typography */
-        .math-block {
-            font-family: 'Cambria Math', 'Times New Roman', serif;
-            letter-spacing: 0.05em;
+        .math-scrollbar::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
         }
 
-        .math-variable {
-            font-style: italic;
+        /* Smooth fade-in for math to prevent unstyled flash */
+        .math-content {
+            opacity: 0;
+            transition: opacity 0.3s ease-in-out;
+        }
+
+        .math-ready .math-content {
+            opacity: 1;
         }
     </style>
 </head>
 
-<body class="bg-slate-50 min-h-screen flex items-center justify-center p-4 font-sans text-slate-800">
+<body class="bg-slate-50 text-slate-800 font-sans min-h-screen flex items-center justify-center p-4">
 
-    <!-- Main Container -->
-    <div
-        class="bg-white rounded-2xl shadow-xl border border-slate-100 w-full max-w-4xl overflow-hidden flex flex-col min-h-[750px] transition-all">
+    <div class="bg-white rounded-2xl shadow-xl w-full max-w-6xl overflow-hidden flex flex-col h-[85vh] max-h-[800px]">
 
-        <!-- Header & Progress -->
-        <div class="bg-white pt-6 px-8 pb-4 border-b border-slate-100">
-            <div class="flex justify-between items-center mb-4">
-                <h1 class="text-2xl font-bold text-slate-900 tracking-tight flex items-center gap-2">
-                    <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"
-                        xmlns="http://www.w3.org/2000/svg">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z"></path>
-                    </svg>
-                    Logistic Regression Demystified
-                </h1>
+        <!-- Header / Progress -->
+        <div class="bg-blue-600 text-white p-6">
+            <div class="flex justify-between items-center mb-2">
+                <h1 class="text-2xl font-bold">Logistic Regression step-by-step</h1>
                 <span id="step-counter"
-                    class="text-sm font-semibold text-blue-600 bg-blue-50 px-3 py-1 rounded-full">Step 1 of 5</span>
+                    class="text-blue-200 font-semibold text-sm bg-blue-800 px-3 py-1 rounded-full">Step 1 of X</span>
             </div>
-
-            <!-- Progress Bar -->
-            <div class="w-full bg-slate-100 rounded-full h-2 mb-2">
-                <div id="progress-bar" class="bg-blue-600 h-2 rounded-full transition-all duration-500 ease-out"
-                    style="width: 20%"></div>
-            </div>
-            <div class="flex justify-between text-xs font-medium text-slate-400" id="step-titles">
-                <!-- Injected by JS -->
+            <div class="w-full bg-blue-400 rounded-full h-1.5 mt-4">
+                <div id="progress-bar" class="bg-white h-1.5 rounded-full transition-all duration-300"
+                    style="width: 0%"></div>
             </div>
         </div>
 
-        <!-- Content Area -->
-        <div class="flex-grow flex flex-col p-8 relative overflow-hidden bg-slate-50/50">
+        <!-- Main Content Area -->
+        <div class="flex-grow flex flex-col md:flex-row overflow-y-auto">
 
-            <!-- Step Title & Description -->
-            <div class="mb-6 h-24">
-                <h2 id="content-title" class="text-3xl font-bold text-slate-800 mb-2 fade-in">The Problem</h2>
-                <p id="content-desc" class="text-slate-600 text-md leading-relaxed fade-in">Why can't we just use
-                    regular Linear Regression for classification?</p>
-            </div>
-
-            <!-- Visualization / Canvas Area -->
+            <!-- Text & Math Panel -->
             <div
-                class="flex-grow w-full bg-white border border-slate-200 rounded-xl shadow-sm flex items-center justify-center relative overflow-hidden p-4">
+                class="w-full md:w-1/2 p-6 md:p-8 flex flex-col border-b md:border-b-0 md:border-r border-slate-100 overflow-y-auto">
+                <h2 id="step-title" class="text-xl font-bold text-slate-800 mb-4">Title</h2>
 
-                <!-- Dynamic Canvas for Charts -->
-                <canvas id="viz-canvas" class="w-full h-full max-h-[350px] absolute inset-0 m-auto" width="800"
-                    height="300"></canvas>
+                <div id="step-description" class="math-content text-slate-600 space-y-4 text-base leading-relaxed mb-6">
+                    <!-- Text injected by JS -->
+                </div>
 
-                <!-- HTML Overlay for Equation (Step 3) -->
-                <div id="equation-container"
-                    class="hidden absolute inset-0 bg-white flex flex-col items-center justify-center p-8 text-center fade-in">
-                    <div
-                        class="text-4xl math-block text-slate-800 mb-8 border-2 border-blue-100 bg-blue-50/30 py-6 px-10 rounded-2xl shadow-sm">
-                        <span class="math-variable">P</span>(<span class="math-variable">y</span>=1 | <span
-                            class="math-variable">x</span>) =
-                        <span class="inline-flex flex-col align-middle text-center mx-2">
-                            <span class="border-b-2 border-slate-800 pb-1">1</span>
-                            <span class="pt-1">1 + <span class="math-variable">e</span><sup>-(<span
-                                        class="math-variable">mx</span> + <span
-                                        class="math-variable">b</span>)</sup></span>
-                        </span>
+                <div id="step-math"
+                    class="math-content math-scrollbar bg-slate-50 p-4 rounded-xl border border-slate-200 text-center my-auto overflow-x-auto min-h-[120px] flex flex-col justify-center items-center">
+                    <!-- LaTeX injected by JS -->
+                </div>
+            </div>
+
+            <!-- Visualization Panel -->
+            <div class="w-full md:w-1/2 bg-slate-50 p-4 md:p-6 flex flex-col min-h-[300px]">
+
+                <!-- Canvas Wrapper to allow dynamic resizing -->
+                <div class="w-full flex-grow relative min-h-[250px]">
+                    <canvas id="vizCanvas"
+                        class="absolute top-0 left-0 w-full h-full bg-white rounded-lg shadow-sm border border-slate-200"></canvas>
+                </div>
+
+                <!-- Interactive Controls (Hidden by default) -->
+                <div id="interactive-controls"
+                    class="hidden w-full mt-4 bg-white p-4 rounded-xl shadow-sm border border-slate-200 flex-shrink-0">
+                    <div class="mb-3">
+                        <label class="flex justify-between text-sm font-medium text-slate-700 mb-1">
+                            <span>Weight ($w$): Steepness</span>
+                            <span id="val-w" class="text-blue-600 font-mono">1.5</span>
+                        </label>
+                        <input type="range" id="slider-w" min="-5" max="10" step="0.1" value="1.5"
+                            class="w-full accent-blue-600">
                     </div>
-                    <div class="grid grid-cols-2 gap-x-12 gap-y-4 text-left text-slate-600 max-w-2xl text-lg">
-                        <p><strong class="text-blue-600 font-semibold">P(y=1 | x)</strong> : Probability that the output
-                            is Class 1, given input x.</p>
-                        <p><strong class="text-blue-600 font-semibold">e</strong> : Euler's number (approx. 2.718).</p>
-                        <p><strong class="text-blue-600 font-semibold">mx + b</strong> : The standard linear regression
-                            formula line.</p>
-                        <p><strong class="text-blue-600 font-semibold">The whole fraction</strong> : The <em>Sigmoid
-                                function</em> that squishes the straight line between 0 and 1.</p>
+                    <div>
+                        <label class="flex justify-between text-sm font-medium text-slate-700 mb-1">
+                            <span>Bias ($b$): Shift</span>
+                            <span id="val-b" class="text-blue-600 font-mono">-6</span>
+                        </label>
+                        <input type="range" id="slider-b" min="-20" max="10" step="0.5" value="-6"
+                            class="w-full accent-blue-600">
                     </div>
                 </div>
-
-                <!-- Interactive UI (Step 5) -->
-                <div id="interactive-ui"
-                    class="hidden absolute bottom-12 left-1/2 transform -translate-x-2/2 w-1/2 bg-white/90 backdrop-blur-sm p-3 rounded-xl border border-slate-200 shadow-md fade-in flex items-center gap-4 text-sm">
-                    <span class="font-semibold text-slate-700 w-24">Input (<span class="math-variable">x</span>):</span>
-                    <input type="range" id="x-slider" min="-10" max="10" value="0" step="0.1"
-                        class="w-full accent-blue-600">
-                    <span id="x-value" class="font-mono text-slate-600 w-12 text-right">0.0</span>
-                </div>
-
-                <!-- Prediction Result Badge (Step 5) -->
-                <div id="prediction-badge"
-                    class="hidden absolute top-4 right-4 bg-white p-3 rounded-lg border border-slate-200 shadow-sm fade-in">
-                    <div class="text-sm text-slate-500 mb-1">Prediction</div>
-                    <div class="text-2xl font-bold text-slate-800" id="pred-prob">50.0%</div>
-                    <div class="text-sm font-semibold mt-1 px-2 py-1 rounded text-center" id="pred-class">Class: ?</div>
-                </div>
-
             </div>
         </div>
 
-        <!-- Footer Controls -->
-        <div class="bg-white border-t border-slate-100 p-6 flex justify-between items-center">
-            <button id="btn-prev"
-                class="px-6 py-2.5 rounded-lg font-medium text-slate-600 bg-slate-100 hover:bg-slate-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
-                </svg>
-                Back
+        <!-- Footer / Navigation -->
+        <div class="p-4 md:p-6 bg-white border-t border-slate-100 flex justify-between items-center">
+            <button id="btn-back"
+                class="px-6 py-2.5 rounded-lg font-medium text-slate-600 bg-slate-100 hover:bg-slate-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
+                &larr; Back
             </button>
-
-            <div class="flex gap-2" id="dot-indicators">
-                <!-- Dots injected by JS -->
-            </div>
-
             <button id="btn-next"
-                class="px-6 py-2.5 rounded-lg font-medium text-white bg-blue-600 hover:bg-blue-700 transition-colors flex items-center gap-2 shadow-sm shadow-blue-600/20">
-                Next Step
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
-                </svg>
+                class="px-6 py-2.5 rounded-lg font-medium text-white bg-blue-600 hover:bg-blue-700 shadow-md transition-all hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed">
+                Next Step &rarr;
             </button>
         </div>
+
     </div>
 
     <script src="../js/logistics_regression.js"></script>
