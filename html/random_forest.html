@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Understanding Random Forests</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc;
+            color: #1e293b;
+        }
+
+        .slide {
+            display: none;
+            animation: fadeIn 0.5s ease-in-out;
+        }
+
+        .slide.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .tree-node {
+            transition: all 0.3s ease;
+        }
+
+        .tree-node:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+    </style>
+</head>
+
+<body class="flex flex-col h-screen">
+
+    <header class="bg-indigo-600 text-white p-4 shadow-md flex justify-between items-center">
+        <h1 class="text-2xl font-bold">Random Forests Demystified</h1>
+        <div class="text-sm bg-indigo-800 px-3 py-1 rounded-full border border-indigo-400">
+            Step <span id="current-step">1</span> of <span id="total-steps">5</span>
+        </div>
+    </header>
+
+    <main class="flex-grow overflow-y-auto p-4 md:p-8 flex justify-center items-start">
+        <div class="max-w-4xl w-full bg-white rounded-xl shadow-lg p-6 md:p-10 border border-slate-200">
+
+            <!-- Slide 1: Introduction -->
+            <div id="slide-1" class="slide active">
+                <h2 class="text-3xl font-extrabold text-indigo-700 mb-6 border-b pb-2">The Wisdom of the Crowd</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div>
+                        <p class="text-lg leading-relaxed mb-4">
+                            You already know how a single <strong>Decision Tree</strong> works. It asks a series of
+                            questions to make a prediction. However, a single tree can sometimes be too rigid,
+                            overfitting the data it trained on and making poor predictions on new data.
+                        </p>
+                        <p class="text-lg leading-relaxed bg-indigo-50 p-4 rounded-lg border-l-4 border-indigo-500">
+                            A <strong>Random Forest</strong> is an <em>ensemble</em> method. Instead of relying on one
+                            tree, it builds a "forest" of many different decision trees and combines their predictions.
+                            It's like asking a whole classroom of students for an answer rather than just one.
+                        </p>
+                    </div>
+                    <div
+                        class="flex flex-col items-center justify-center bg-slate-50 rounded-lg p-4 border border-slate-200">
+                        <svg width="200" height="200" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+                            <!-- Trees icon representation -->
+                            <g fill="none" stroke="#4f46e5" stroke-width="4" stroke-linecap="round"
+                                stroke-linejoin="round">
+                                <!-- Tree 1 -->
+                                <path d="M40 160 v-40 m0 0 l-20 -20 m20 20 l20 -20 m-20 -20 v40" />
+                                <circle cx="40" cy="80" r="25" fill="#e0e7ff" />
+                                <!-- Tree 2 -->
+                                <path d="M100 180 v-60 m0 0 l-30 -30 m30 30 l30 -30 m-30 -30 v60" />
+                                <circle cx="100" cy="60" r="35" fill="#c7d2fe" />
+                                <!-- Tree 3 -->
+                                <path d="M160 150 v-30 m0 0 l-20 -20 m20 20 l20 -20 m-20 -20 v30" />
+                                <circle cx="160" cy="80" r="20" fill="#e0e7ff" />
+                            </g>
+                        </svg>
+                        <p class="text-sm text-slate-500 mt-2 font-medium">Many trees working together</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Slide 2: Real-World Example -->
+            <div id="slide-2" class="slide">
+                <h2 class="text-3xl font-extrabold text-indigo-700 mb-6 border-b pb-2">Student Example: Predicting Final
+                    Grades</h2>
+                <p class="text-lg mb-6">
+                    Imagine we want to predict if a student will pass or fail a difficult exam.
+                </p>
+                <div class="bg-white rounded-lg shadow border border-slate-200 p-6">
+                    <h3 class="text-xl font-bold mb-4 text-slate-800">The Data</h3>
+                    <p class="mb-4 text-slate-600">We have data on past students: hours studied, attendance rate,
+                        assignment scores, and whether they passed.</p>
+
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                        <div class="bg-emerald-50 p-4 rounded-lg border border-emerald-200">
+                            <h4 class="font-bold text-emerald-800">Tree 1 (The Bookworm)</h4>
+                            <p class="text-sm mt-2">Focuses heavily on "Hours Studied". Predicts: <strong>Pass</strong>
+                            </p>
+                        </div>
+                        <div class="bg-amber-50 p-4 rounded-lg border border-amber-200">
+                            <h4 class="font-bold text-amber-800">Tree 2 (The Participator)</h4>
+                            <p class="text-sm mt-2">Focuses on "Attendance". Predicts: <strong>Fail</strong></p>
+                        </div>
+                        <div class="bg-blue-50 p-4 rounded-lg border border-blue-200">
+                            <h4 class="font-bold text-blue-800">Tree 3 (The Homeworker)</h4>
+                            <p class="text-sm mt-2">Focuses on "Assignment Scores". Predicts: <strong>Pass</strong></p>
+                        </div>
+                    </div>
+                    <div class="text-center p-4 bg-indigo-100 rounded-lg border border-indigo-300">
+                        <p class="text-xl font-semibold text-indigo-900">Final Random Forest Prediction</p>
+                        <p class="text-lg mt-2">2 Pass vs 1 Fail &rarr; <strong class="text-emerald-600">Majority Vote:
+                                Pass</strong></p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Slide 3: Step 1 - Bootstrapping / Bagging -->
+            <div id="slide-3" class="slide">
+                <h2 class="text-3xl font-extrabold text-indigo-700 mb-6 border-b pb-2">Step 1: Bootstrapping (Creating
+                    the Data)</h2>
+                <p class="text-lg mb-4">
+                    If every tree used the exact same data, they would all be identical. Random Forest prevents this
+                    using <strong>Bootstrap Aggregating (Bagging)</strong>.
+                </p>
+                <div class="bg-slate-50 p-6 rounded-lg border border-slate-200 mb-6">
+                    <p class="mb-4">
+                        For each tree, we create a new training dataset by randomly selecting samples from the original
+                        data <strong>with replacement</strong>.
+                    </p>
+                    <div class="flex items-center justify-center space-x-4 flex-wrap">
+                        <div class="text-center">
+                            <div class="bg-white border-2 border-slate-400 p-2 rounded shadow-sm w-32 mb-2">Original
+                                Data<br>[A, B, C, D, E]</div>
+                        </div>
+                        <div class="text-2xl text-indigo-500 font-bold">&rarr;</div>
+                        <div class="space-y-2">
+                            <div class="bg-emerald-100 border border-emerald-300 p-2 rounded shadow-sm text-sm">Tree 1
+                                Data: [A, B, B, D, E]</div>
+                            <div class="bg-amber-100 border border-amber-300 p-2 rounded shadow-sm text-sm">Tree 2 Data:
+                                [A, C, C, C, E]</div>
+                            <div class="bg-blue-100 border border-blue-300 p-2 rounded shadow-sm text-sm">Tree n Data:
+                                [B, D, E, E, E]</div>
+                        </div>
+                    </div>
+                    <p class="mt-4 text-sm text-slate-500 italic text-center">Notice how some students (like C) might
+                        appear multiple times in one set, and not at all in another.</p>
+                </div>
+            </div>
+
+            <!-- Slide 4: Step 2 - Feature Randomness -->
+            <div id="slide-4" class="slide">
+                <h2 class="text-3xl font-extrabold text-indigo-700 mb-6 border-b pb-2">Step 2: Feature Randomness</h2>
+                <p class="text-lg mb-4">
+                    To make the trees even more diverse, Random Forest adds another layer of randomness during the
+                    growth of each tree.
+                </p>
+                <div class="bg-slate-50 p-6 rounded-lg border border-slate-200 mb-6">
+                    <p class="mb-4">
+                        At each node split in the tree, instead of looking at all features (e.g., Study Hours,
+                        Attendance, Past Grades, Sleep), it only considers a <strong>random subset of features</strong>.
+                    </p>
+                    <div class="overflow-x-auto text-center">
+                        <p class="mb-2 font-semibold">Standard formula for subset size \( m \):</p>
+                        <div class="text-xl my-4">
+                            $$ m \approx \sqrt{p} $$
+                        </div>
+                        <p class="text-sm text-slate-600">Where \( p \) is the total number of features (e.g., if we
+                            have 9 features about a student, each node split only looks at roughly 3 random features to
+                            decide how to split).</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Slide 5: Step 3 - Aggregation (The Formula) -->
+            <div id="slide-5" class="slide">
+                <h2 class="text-3xl font-extrabold text-indigo-700 mb-6 border-b pb-2">Step 3: Aggregation (Making the
+                    Prediction)</h2>
+                <p class="text-lg mb-4">
+                    Once all the trees are built, how do we get the final answer? It depends on the task!
+                </p>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Classification -->
+                    <div class="bg-white rounded-lg shadow-md border border-slate-200 p-5">
+                        <h3 class="text-xl font-bold mb-3 text-indigo-600">Classification (Pass/Fail)</h3>
+                        <p class="text-slate-700 mb-3"><strong>Majority Voting:</strong> The class predicted by the most
+                            trees wins.</p>
+                        <div class="bg-slate-50 p-3 rounded text-center overflow-x-auto">
+                            $$ \hat{y} = \text{mode}\{h_1(x), h_2(x), ..., h_B(x)\} $$
+                        </div>
+                        <p class="text-sm text-slate-500 mt-2">Where \( h_b(x) \) is the prediction of the \( b \)-th
+                            tree, and \( B \) is the total number of trees.</p>
+                    </div>
+
+                    <!-- Regression -->
+                    <div class="bg-white rounded-lg shadow-md border border-slate-200 p-5">
+                        <h3 class="text-xl font-bold mb-3 text-emerald-600">Regression (Predicting Score)</h3>
+                        <p class="text-slate-700 mb-3"><strong>Averaging:</strong> The final prediction is the average
+                            of all tree predictions.</p>
+                        <div class="bg-slate-50 p-3 rounded text-center overflow-x-auto">
+                            $$ \hat{y} = \frac{1}{B} \sum_{b=1}^{B} h_b(x) $$
+                        </div>
+                        <p class="text-sm text-slate-500 mt-2">We simply add up all the predicted exam scores from each
+                            tree and divide by the number of trees.</p>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <footer
+        class="bg-white border-t border-slate-200 p-4 md:p-6 flex justify-between items-center shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)] z-10">
+        <button id="btn-prev"
+            class="px-6 py-2.5 bg-slate-200 hover:bg-slate-300 text-slate-700 font-semibold rounded-lg transition duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center">
+            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+            </svg>
+            Previous
+        </button>
+        <button id="btn-next"
+            class="px-6 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-lg shadow-md transition duration-200 flex items-center">
+            Next
+            <svg class="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+            </svg>
+        </button>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const slides = document.querySelectorAll('.slide');
+            const totalSteps = slides.length;
+            let currentStep = 1;
+
+            const btnNext = document.getElementById('btn-next');
+            const btnPrev = document.getElementById('btn-prev');
+            const stepDisplay = document.getElementById('current-step');
+            const totalDisplay = document.getElementById('total-steps');
+
+            totalDisplay.textContent = totalSteps;
+
+            function updateUI() {
+                // Update slides visibility
+                slides.forEach((slide, index) => {
+                    if (index + 1 === currentStep) {
+                        slide.classList.add('active');
+                    } else {
+                        slide.classList.remove('active');
+                    }
+                });
+
+                // Update counter
+                stepDisplay.textContent = currentStep;
+
+                // Update button states
+                btnPrev.disabled = currentStep === 1;
+
+                if (currentStep === totalSteps) {
+                    btnNext.innerHTML = `Finish <svg class="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>`;
+                    btnNext.classList.remove('bg-indigo-600', 'hover:bg-indigo-700');
+                    btnNext.classList.add('bg-emerald-600', 'hover:bg-emerald-700');
+                } else {
+                    btnNext.innerHTML = `Next <svg class="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>`;
+                    btnNext.classList.add('bg-indigo-600', 'hover:bg-indigo-700');
+                    btnNext.classList.remove('bg-emerald-600', 'hover:bg-emerald-700');
+                }
+
+                // Trigger MathJax re-render for the active slide if needed
+                if (window.MathJax) {
+                    MathJax.typesetPromise([slides[currentStep - 1]]).catch((err) => console.log('MathJax error:', err));
+                }
+            }
+
+            btnNext.addEventListener('click', () => {
+                if (currentStep < totalSteps) {
+                    currentStep++;
+                    updateUI();
+                } else {
+                    currentStep.disabled = true;
+                    // Reset to beginning when finished
+                    // currentStep = 1;
+                    // updateUI();
+                }
+            });
+
+            btnPrev.addEventListener('click', () => {
+                if (currentStep > 1) {
+                    currentStep--;
+                    updateUI();
+                }
+            });
+
+            // Initialize UI
+            updateUI();
+        });
+    </script>
+</body>
+
+</html>
