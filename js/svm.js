@@ -63,7 +63,13 @@ const steps = [
                     <p class="mt-1 font-serif">Minimize: &frac12; ||<b>w</b>||&sup2;</p>
                     <p class="mt-1 font-serif text-xs text-slate-500">Subject to: y<sub>i</sub>(<b>w</b> &middot; <b>x</b><sub>i</sub> + b) &ge; 1 for all points.</p>
                 </div>
-                <p class="mt-3 text-sm">This constraint simply means: <i>"No data points are allowed inside the margin lane!"</i></p>`
+                <p class="mt-3 text-sm">This constraint simply means: <i>"No data points are allowed inside the margin lane!"</i></p>
+                <button onclick="window.location.href='../html/svm_safezone_gameplay.html'" class="mt-5 w-full flex items-center justify-center gap-2 px-4 py-3 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl text-sm font-bold shadow-md hover:shadow-lg transition-all active:scale-95 cursor-pointer">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd" />
+                    </svg>
+                    Safe Zones Gameplay
+                </button>`
     },
     {
         title: "8. Soft Margins & Messy Data",

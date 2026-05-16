@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The SVM Playground Game</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Comic+Neue:wght@400;700&display=swap');
+
+        body {
+            font-family: 'Comic Neue', cursive;
+            background-color: #f0f9ff;
+        }
+
+        .kid {
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .margin-line {
+            transition: left 0.1s linear, right 0.1s linear;
+        }
+
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(1.05);
+            }
+
+            100% {
+                transform: scale(1);
+            }
+        }
+    </style>
+</head>
+
+<body class="min-h-screen flex items-center justify-center p-4">
+
+    <div class="max-w-4xl w-full bg-white rounded-3xl shadow-2xl overflow-hidden border-4 border-sky-200">
+
+        <!-- STORY SCREEN -->
+        <div id="story-screen" class="p-8 text-slate-700 text-lg leading-relaxed">
+            <h2 class="text-4xl font-bold text-sky-600 mb-8 text-center drop-shadow-sm">📖 The Story of the Safe Zone
+            </h2>
+
+            <div class="space-y-6">
+                <div class="bg-slate-50 p-5 rounded-2xl border-2 border-slate-100 shadow-sm flex gap-4 items-start">
+                    <div class="text-5xl">🏫</div>
+                    <div>
+                        <p>Imagine a playground where <strong>Team Apple 🍎</strong> and <strong>Team Orange 🍊</strong>
+                            are playing. But oh no! They keep bumping into each other! The Teacher decides they need a
+                            <strong>Blue Safe Zone</strong> down the middle to keep them apart.</p>
+                    </div>
+                </div>
+
+                <div class="bg-slate-50 p-5 rounded-2xl border-2 border-slate-100 shadow-sm flex gap-4 items-start">
+                    <div class="text-5xl">🧟‍♂️</div>
+                    <div>
+                        <p>To build this Safe Zone, they hire an invisible Giant. The Giant has a special power called
+                            <strong>"Squeeze Force" (we call it <em>w</em> in math)</strong>.</p>
+                        <p class="mt-2">If the Giant pushes the walls hard (<strong class="text-red-500">Big
+                                <em>w</em></strong>), the Safe Zone gets squished and becomes very
+                            <strong>thin</strong>. If the Giant relaxes (<strong class="text-green-500">Small
+                                <em>w</em></strong>), the Safe Zone becomes nice and <strong>wide</strong>!</p>
+                    </div>
+                </div>
+
+                <div class="bg-slate-50 p-5 rounded-2xl border-2 border-slate-100 shadow-sm flex gap-4 items-start">
+                    <div class="text-5xl">👩‍🏫</div>
+                    <div>
+                        <p>But there is a catch! The Teacher has one strict rule:</p>
+                        <p class="font-bold text-xl text-red-600 mt-1">"NO KIDS ARE ALLOWED INSIDE THE SAFE ZONE!"</p>
+                        <p class="text-sm text-slate-500 mt-1">(This is our math rule: <em>y(wx + b) ≥ 1</em>).</p>
+                    </div>
+                </div>
+
+                <div class="bg-sky-100 p-6 rounded-2xl border-4 border-sky-300 text-center shadow-inner mt-8">
+                    <h3 class="font-bold text-2xl text-sky-900 mb-2">🎯 Your Mission</h3>
+                    <p class="text-sky-800 text-lg">
+                        Act as the Computer! Make the Giant as <strong>lazy as possible</strong> (Minimize Squeeze Force
+                        <em>w</em>) to get the BIGGEST Safe Zone... BUT make sure you <strong>don't break the Teacher's
+                            rule!</strong>
+                    </p>
+                </div>
+            </div>
+
+            <button id="start-game-btn"
+                class="mt-8 w-full py-4 bg-sky-500 hover:bg-sky-400 text-white text-2xl font-bold rounded-2xl shadow-[0_6px_0_#0284c7] hover:shadow-[0_4px_0_#0284c7] hover:translate-y-[2px] active:shadow-[0_0px_0_#0284c7] active:translate-y-[6px] transition-all">
+                🎮 Got it! Let's Play!
+            </button>
+        </div>
+
+        <!-- GAME SCREEN -->
+        <div id="game-screen" class="hidden">
+            <div class="bg-sky-400 text-white text-center p-6">
+                <h1 class="text-4xl font-bold mb-2">🍎 The Safe Zone Game 🍊</h1>
+                <p class="text-lg opacity-90">Find the perfect Margin!</p>
+            </div>
+
+            <div class="p-6">
+                <!-- Slider Controls -->
+                <div class="mb-6 bg-slate-100 p-4 rounded-xl shadow-inner border-2 border-slate-200">
+                    <label class="block text-slate-700 font-bold mb-2 text-xl">
+                        Giant's Squeeze Force (<span class="italic font-serif">w</span>):
+                    </label>
+                    <div class="flex items-center gap-4">
+                        <span class="text-2xl" title="Lazy Giant">😴</span>
+                        <input type="range" id="squeeze-slider" min="1" max="10" value="5"
+                            class="w-full h-4 bg-sky-200 rounded-lg appearance-none cursor-pointer accent-sky-600">
+                        <span class="text-2xl" title="Strong Giant">💪</span>
+                    </div>
+                    <div class="flex justify-between text-sm text-slate-500 font-bold mt-1 px-8">
+                        <span>Lazy Giant (Small <em>w</em>)</span>
+                        <span>Strong Giant (Big <em>w</em>)</span>
+                    </div>
+                </div>
+
+                <!-- Playground Area -->
+                <div
+                    class="relative w-full h-64 bg-green-100 border-4 border-green-500 rounded-2xl overflow-hidden shadow-inner mb-4">
+
+                    <!-- The Safe Zone (Margin) -->
+                    <div id="safe-zone"
+                        class="absolute top-0 bottom-0 bg-blue-300/50 border-x-4 border-blue-500 border-dashed margin-line flex items-center justify-center">
+                        <div class="bg-white/80 px-3 py-1 rounded-full font-bold text-blue-800 shadow-sm">
+                            Width: <span id="width-value"></span>
+                        </div>
+                    </div>
+
+                    <!-- Decision Boundary (The Line) -->
+                    <div class="absolute top-0 bottom-0 left-1/2 w-1 bg-slate-800 -translate-x-1/2 z-10"></div>
+
+                    <!-- Kids (Apples - Left) -->
+                    <div id="apple-1"
+                        class="kid absolute left-[25%] top-[40%] -translate-x-1/2 w-12 h-12 bg-red-500 rounded-full flex items-center justify-center text-2xl shadow-md z-20 border-2 border-red-700">
+                        🍎</div>
+                    <div
+                        class="kid absolute left-[15%] top-[20%] -translate-x-1/2 w-12 h-12 bg-red-500 rounded-full flex items-center justify-center text-2xl shadow-md z-20 border-2 border-red-700">
+                        🍎</div>
+                    <div
+                        class="kid absolute left-[10%] top-[70%] -translate-x-1/2 w-12 h-12 bg-red-500 rounded-full flex items-center justify-center text-2xl shadow-md z-20 border-2 border-red-700">
+                        🍎</div>
+
+                    <!-- Kids (Oranges - Right) -->
+                    <div id="orange-1"
+                        class="kid absolute left-[75%] top-[60%] -translate-x-1/2 w-12 h-12 bg-orange-500 rounded-full flex items-center justify-center text-2xl shadow-md z-20 border-2 border-orange-700">
+                        🍊</div>
+                    <div
+                        class="kid absolute left-[85%] top-[30%] -translate-x-1/2 w-12 h-12 bg-orange-500 rounded-full flex items-center justify-center text-2xl shadow-md z-20 border-2 border-orange-700">
+                        🍊</div>
+                    <div
+                        class="kid absolute left-[90%] top-[80%] -translate-x-1/2 w-12 h-12 bg-orange-500 rounded-full flex items-center justify-center text-2xl shadow-md z-20 border-2 border-orange-700">
+                        🍊</div>
+
+                    <!-- Container for new kids drop -->
+                    <div id="new-kids-container"></div>
+                </div>
+
+                <div id="teacher-box" class="p-4 rounded-xl border-4 mt-6 transition-colors duration-300">
+                    <h3 class="text-xl font-bold mb-2 flex items-center gap-2">
+                        <span id="teacher-icon" class="text-3xl">👩‍🏫</span>
+                        <span id="teacher-title">The Teacher's Rule</span>
+                    </h3>
+                    <p id="teacher-message" class="text-lg">Move the slider to see what the teacher says!</p>
+                </div>
+
+                <!-- MATH DECODER SECTION -->
+                <div
+                    class="mt-6 p-4 bg-slate-800 text-green-400 font-mono rounded-xl border-2 border-slate-900 shadow-inner">
+                    <h3 class="text-white text-lg font-bold font-sans mb-2 flex items-center gap-2"><span>🤖</span> The
+                        Math Decoder</h3>
+                    <div class="mb-3 p-2 bg-slate-700/50 rounded">
+                        <span class="text-pink-400 font-bold">Minimize:</span> ½ ||<span id="math-w"
+                            class="text-white font-bold bg-pink-500/30 px-1 rounded">w</span>||²
+                        <span class="text-slate-300 text-sm font-sans block mt-1">↳ <span id="math-w-text">Make Squeeze
+                                Force (w) small</span></span>
+                    </div>
+                    <div class="p-2 bg-slate-700/50 rounded">
+                        <div class="mb-3">
+                            <span class="text-yellow-400 font-bold">Subject to:</span> <span
+                                class="text-blue-300">y<sub>i</sub></span><span class="text-purple-300">(w·x<sub>i</sub>
+                                + b)</span> <span id="math-rule"
+                                class="text-white font-bold bg-yellow-500/30 px-1 rounded">≥ 1</span>
+                        </div>
+
+                        <!-- DETAILED BREAKDOWN -->
+                        <div class="pl-4 border-l-2 border-slate-600 space-y-3 mt-2 mb-3 font-sans text-sm">
+                            <p leading-tight><span
+                                    class="text-blue-300 font-bold font-mono text-base">y<sub>i</sub></span> <strong
+                                    class="text-white">(The Team):</strong> <span class="text-slate-300">Is the kid on
+                                    Team Apple (+1) or Team Orange (-1)?</span></p>
+                            <p leading-tight><span
+                                    class="text-purple-300 font-bold font-mono text-base">(w·x<sub>i</sub> + b)</span>
+                                <strong class="text-white">(The Kid's Spot):</strong> <span class="text-slate-300">This
+                                    is just calculating exactly where kid x is standing on the playground floor.</span>
+                            </p>
+                            <p leading-tight><span class="text-yellow-300 font-bold font-mono text-base">≥ 1</span>
+                                <strong class="text-white">(The Safe Distance):</strong> <span
+                                    class="text-slate-300">This means their distance must be Greater Than or Equal to 1
+                                    step. In other words, they must stand OUTSIDE the blue safe zone.</span></p>
+                        </div>
+
+                        <span
+                            class="text-slate-200 text-sm font-sans block mt-2 border-t border-slate-600 pt-2 font-bold">↳
+                            <span id="math-rule-text">Kids stay OUT of the Safe Zone</span></span>
+                    </div>
+                </div>
+
+                <div class="mt-8 p-4 bg-yellow-100 rounded-xl border-2 border-yellow-300">
+                    <p class="font-bold text-yellow-800">The Computer's Job (Optimization):</p>
+                    <p class="text-yellow-900 mt-1">Make the Giant as lazy as possible (minimize <em>w</em>), BUT follow
+                        the Teacher's rule (no kids in the blue zone!).</p>
+                </div>
+
+                <div class="mt-6 p-4 bg-purple-100 rounded-xl border-2 border-purple-300">
+                    <h3 class="text-xl font-bold text-purple-800 mb-2">Step 2: Tomorrow's Game (Test Data)</h3>
+                    <p class="text-purple-900 mb-4">What happens when new, clumsy kids join? A wide safe zone catches
+                        their mistakes! A narrow one causes crashes.</p>
+                    <button id="drop-kids-btn"
+                        class="w-full py-3 bg-purple-500 hover:bg-purple-600 text-white font-bold rounded-lg shadow-md transition-transform active:scale-95">
+                        🏃‍♂️ Drop Clumsy New Kids!
+                    </button>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <script src="../js/svm_safezone_gameplay.js"></script>
+</body>
+
+</html>
