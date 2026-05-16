@@ -6,61 +6,83 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>K-Nearest Neighbors (KNN) Visualization</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <!-- Add PrismJS for syntax highlighting in the code step -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+
     <style>
         /* Smooth transitions for text content */
         .fade-transition {
             transition: opacity 0.3s ease-in-out;
+        }
+
+        /* MathJax Custom Styling overrides to fit the UI */
+        .MathJax {
+            font-size: 1.1em !important;
+            color: #1e293b !important;
+        }
+
+        /* Adjustments for the code block step to utilize space better */
+        pre[class*="language-"] {
+            margin: 0 !important;
+            border-radius: 0.5rem;
+            font-size: 0.85rem;
         }
     </style>
 </head>
 
 <body class="bg-slate-50 min-h-screen font-sans text-slate-800 flex items-center justify-center p-4">
 
-    <div class="max-w-5xl w-full bg-white rounded-2xl shadow-xl overflow-hidden border border-slate-200">
+    <div class="max-w-6xl w-full bg-white rounded-2xl shadow-xl overflow-hidden border border-slate-200">
 
         <!-- Header -->
         <div class="bg-slate-800 text-white p-6 text-center">
             <h1 class="text-3xl font-bold tracking-wide">K-Nearest Neighbors (KNN)</h1>
-            <p class="text-slate-300 mt-2">An interactive step-by-step guide to how KNN classifies data</p>
+            <p class="text-slate-300 mt-2">An interactive step-by-step guide to distance metrics and classification</p>
         </div>
 
-        <div class="p-6 md:p-8 flex flex-col md:flex-row gap-8 items-center">
+        <div class="p-6 md:p-8 flex flex-col lg:flex-row gap-8 items-start">
 
-            <!-- Canvas Container -->
-            <div class="flex-1 w-full bg-slate-50 rounded-xl border-2 border-slate-100 p-2 shadow-inner">
-                <canvas id="knnCanvas" width="600" height="400"
-                    class="w-full h-auto rounded-lg cursor-crosshair"></canvas>
+            <!-- Canvas Container (Left Side) -->
+            <div id="visualContainer"
+                class="w-full lg:w-1/2 bg-slate-50 rounded-xl border-2 border-slate-100 p-2 shadow-inner sticky top-6 transition-all duration-300">
+                <canvas id="knnCanvas" width="500" height="400"
+                    class="w-full h-auto rounded-lg cursor-crosshair bg-white"></canvas>
+                <div class="text-center mt-2 text-xs text-slate-500 font-medium">
+                    Axes: X = Math Score, Y = Science Score
+                </div>
             </div>
 
-            <!-- Content & Controls Container -->
-            <div class="flex-1 w-full flex flex-col h-full min-h-[350px] justify-between">
+            <!-- Content & Controls Container (Right Side) -->
+            <div id="textContainer"
+                class="w-full lg:w-1/2 flex flex-col min-h-[450px] justify-between transition-all duration-300">
 
                 <div>
                     <!-- Step Progress Indicator -->
                     <div class="flex items-center gap-2 mb-6 text-sm font-semibold text-slate-400">
-                        <span id="stepCounter" class="bg-indigo-100 text-indigo-700 px-3 py-1 rounded-full">Step 1 of
-                            6</span>
+                        <span id="stepCounter" class="bg-indigo-100 text-indigo-700 px-3 py-1 rounded-full">Step
+                            1</span>
                     </div>
 
                     <!-- Dynamic Content Area -->
                     <div id="contentArea" class="fade-transition">
                         <h2 id="stepTitle" class="text-2xl font-bold text-slate-800 mb-4">Title</h2>
-                        <p id="stepDescription" class="text-lg text-slate-600 leading-relaxed">Description goes here.
-                        </p>
+                        <div id="stepDescription" class="text-md text-slate-600 leading-relaxed space-y-3">
+                            Description goes here.
+                        </div>
 
-                        <!-- Equation Block (Hidden by default) -->
-                        <div id="equationBlock" class="hidden mt-6 bg-blue-50 border border-blue-200 p-5 rounded-xl">
-                            <p class="text-sm font-semibold text-blue-800 uppercase tracking-wider mb-2">Euclidean
-                                Distance Formula</p>
-                            <div
-                                class="text-center font-serif text-xl text-slate-800 flex items-center justify-center gap-3">
-                                <span>d =</span>
-                                <span>&radic;<span
-                                        class="border-t-[1.5px] border-slate-800 inline-block pt-1 ml-1">(x&#8322; -
-                                        x&#8321;)&sup2; + (y&#8322; - y&#8321;)&sup2;</span></span>
-                            </div>
-                            <p class="text-xs text-blue-600 mt-3">Where (x&#8321;, y&#8321;) is our new point, and
-                                (x&#8322;, y&#8322;) is an existing dataset point.</p>
+                        <!-- Equation Block (Hidden by default, injected dynamically) -->
+                        <div id="equationBlock"
+                            class="hidden mt-6 bg-blue-50/50 border border-blue-200 p-5 rounded-xl shadow-sm">
+                            <!-- Math content will be injected here -->
+                        </div>
+
+                        <!-- Code Tutorial Block (Hidden by default) -->
+                        <div id="codeBlock" class="hidden mt-4">
+                            <!-- Code content injected here -->
                         </div>
                     </div>
                 </div>
