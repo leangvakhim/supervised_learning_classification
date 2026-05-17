@@ -176,6 +176,50 @@ const steps = [
                 </div>
             </div>
         `
+    },
+    {
+        title: "8. Python Code (Scikit-Learn)",
+        content: `
+            <p class="mb-4 text-lg">You rarely have to calculate these by hand! In Python, the <strong>scikit-learn</strong> library does all the heavy lifting in just a few lines of code.</p>
+
+            <!-- Code Block Simulation -->
+            <div class="bg-slate-900 text-slate-200 rounded-lg p-5 mb-6 font-mono text-sm shadow-inner overflow-x-auto code-scroll leading-relaxed">
+                <div class="text-slate-500 mb-2"># 1. Import the pre-built math tools</div>
+                <div><span class="text-pink-400">from</span> <span class="text-white">sklearn.metrics</span> <span class="text-pink-400">import</span> <span class="text-blue-300">accuracy_score, precision_score, recall_score, f1_score</span></div>
+                <br>
+
+                <div class="text-slate-500 mb-2"># 2. Provide the truth vs. what our model guessed (0 = Healthy, 1 = Sick)</div>
+                <div><span class="text-blue-300">y_actual</span> = [<span class="text-orange-300">0</span>, <span class="text-orange-300">1</span>, <span class="text-orange-300">1</span>, <span class="text-orange-300">0</span>, <span class="text-orange-300">1</span>, <span class="text-orange-300">0</span>] <span class="text-slate-500 ml-4"># The actual results</span></div>
+                <div><span class="text-blue-300">y_predict</span> = [<span class="text-orange-300">0</span>, <span class="text-orange-300">1</span>, <span class="text-orange-300">0</span>, <span class="text-orange-300">0</span>, <span class="text-orange-300">1</span>, <span class="text-orange-300">1</span>] <span class="text-slate-500 ml-4"># The AI doctor's guesses</span></div>
+                <br>
+
+                <div class="text-slate-500 mb-2"># 3. Let the library calculate the metrics!</div>
+                <div><span class="text-blue-300">acc</span> = <span class="text-emerald-400">accuracy_score</span>(<span class="text-blue-200">y_actual</span>, <span class="text-blue-200">y_predict</span>)</div>
+                <div><span class="text-blue-300">prec</span> = <span class="text-emerald-400">precision_score</span>(<span class="text-blue-200">y_actual</span>, <span class="text-blue-200">y_predict</span>)</div>
+                <div><span class="text-blue-300">rec</span> = <span class="text-emerald-400">recall_score</span>(<span class="text-blue-200">y_actual</span>, <span class="text-blue-200">y_predict</span>)</div>
+                <div><span class="text-blue-300">f1</span> = <span class="text-emerald-400">f1_score</span>(<span class="text-blue-200">y_actual</span>, <span class="text-blue-200">y_predict</span>)</div>
+            </div>
+
+            <!-- Step-by-Step Code Explanation -->
+            <h3 class="font-bold text-slate-800 text-lg mb-4">Code Breakdown:</h3>
+
+            <div class="space-y-4 text-slate-600">
+                <div class="flex items-start">
+                    <span class="bg-blue-100 text-blue-700 rounded-full min-h-[28px] min-w-[28px] flex items-center justify-center font-bold mr-3 mt-0.5 shrink-0">1</span>
+                    <p><strong>Importing:</strong> We pull the specific scoring functions from <code>sklearn.metrics</code>. Think of this as grabbing the right tools out of a toolbox before starting to work.</p>
+                </div>
+
+                <div class="flex items-start">
+                    <span class="bg-blue-100 text-blue-700 rounded-full min-h-[28px] min-w-[28px] flex items-center justify-center font-bold mr-3 mt-0.5 shrink-0">2</span>
+                    <p><strong>The Data:</strong> We need two lists to compare. <code>y_actual</code> is the ultimate truth (e.g., test results showing who is actually sick). <code>y_predict</code> contains the answers our machine learning model guessed.</p>
+                </div>
+
+                <div class="flex items-start">
+                    <span class="bg-blue-100 text-blue-700 rounded-full min-h-[28px] min-w-[28px] flex items-center justify-center font-bold mr-3 mt-0.5 shrink-0">3</span>
+                    <p><strong>Calculating:</strong> We just pass our two lists into the functions! The library automatically builds the Confusion Matrix in the background, applies the formulas we learned in Step 7, and saves the final scores in our variables.</p>
+                </div>
+            </div>
+        `
     }
 ];
 
@@ -204,6 +248,9 @@ function renderStep() {
         ${step.content}
     `;
     contentArea.classList.add('fade-in');
+
+    // Scroll to top of content area on new step
+    contentArea.scrollTop = 0;
 
     // Update Progress Bar & Indicator
     const progressPercentage = ((currentStepIndex + 1) / steps.length) * 100;
