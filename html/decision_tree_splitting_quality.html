@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Splitting Quality: Interactive Guide</title>
+
+    <!-- Load TailwindCSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Configure and Load MathJax for LaTeX rendering -->
+    <script>
+        MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']]
+            },
+            svg: {
+                fontCache: 'global'
+            }
+        };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+    <style>
+        /* Smooth fade-in animation for page transitions */
+        .fade-in {
+            animation: fadeIn 0.4s ease-in-out forwards;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Hide scrollbar for clean math blocks if they overflow on mobile */
+        .math-scroll::-webkit-scrollbar {
+            height: 6px;
+        }
+
+        .math-scroll::-webkit-scrollbar-thumb {
+            background-color: #cbd5e1;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+
+<body class="bg-slate-50 text-slate-800 font-sans min-h-screen flex items-center justify-center p-4 sm:p-8">
+
+    <main class="w-full max-w-4xl bg-white rounded-2xl shadow-xl overflow-hidden flex flex-col min-h-[600px]">
+
+        <!-- Header & Progress Bar -->
+        <header class="bg-indigo-600 text-white p-6 pb-4">
+            <h1 class="text-2xl sm:text-3xl font-bold mb-2">Decision Tree Splitting Quality</h1>
+            <p class="text-indigo-200 text-sm sm:text-base">Evaluating Information Gain, Split Information, and Gain
+                Ratio</p>
+
+            <!-- Progress Indicator -->
+            <div class="mt-6 flex items-center gap-4">
+                <span id="progress-text" class="text-sm font-semibold whitespace-nowrap">Page 1 of 6</span>
+                <div class="w-full bg-indigo-800 h-2 rounded-full overflow-hidden">
+                    <div id="progress-bar" class="bg-teal-400 h-full transition-all duration-300"
+                        style="width: 16.66%;"></div>
+                </div>
+            </div>
+        </header>
+
+        <div id="content-container" class="flex-grow p-6 sm:p-10 relative">
+
+            <!-- PAGE 1: Introduction -->
+            <section id="page-1" class="page-section fade-in">
+                <div class="flex items-center gap-3 mb-6">
+                    <span class="text-4xl">🏫</span>
+                    <h2 class="text-3xl font-bold text-slate-800">The Classroom Dilemma</h2>
+                </div>
+
+                <div class="space-y-4 text-lg leading-relaxed text-slate-600">
+                    <p>Imagine you are trying to predict whether a student will <strong>Pass</strong> or
+                        <strong>Fail</strong> a final exam. You have a dataset of <strong>15 students</strong>.</p>
+                    <ul class="list-disc list-inside bg-slate-100 p-4 rounded-xl font-medium text-slate-700">
+                        <li>✅ 9 Students Passed</li>
+                        <li>❌ 6 Students Failed</li>
+                    </ul>
+                    <p>You are building a Decision Tree, and you need to choose the best feature to split your data. You
+                        have two choices:</p>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
+                        <div class="border-2 border-indigo-100 bg-indigo-50 p-5 rounded-xl">
+                            <h3 class="font-bold text-indigo-700 mb-2">Choice A: Attendance</h3>
+                            <p class="text-sm">Splits the class into two groups: <strong>High</strong> or
+                                <strong>Low</strong> attendance. Makes logical sense.</p>
+                        </div>
+                        <div class="border-2 border-rose-100 bg-rose-50 p-5 rounded-xl">
+                            <h3 class="font-bold text-rose-700 mb-2">Choice B: Student ID</h3>
+                            <p class="text-sm">Splits the class into 15 groups based on their unique ID number. Every
+                                group gets exactly 1 student.</p>
+                        </div>
+                    </div>
+
+                    <p class="mt-6 italic font-semibold text-center text-slate-500">Which split is mathematically
+                        better? Let's prove it step-by-step.</p>
+                </div>
+            </section>
+
+            <!-- PAGE 2: Base Entropy -->
+            <section id="page-2" class="page-section hidden">
+                <div class="flex items-center gap-3 mb-6">
+                    <span class="text-4xl">🧪</span>
+                    <h2 class="text-3xl font-bold text-slate-800">Step 0: Measuring the "Messiness"</h2>
+                </div>
+
+                <div class="space-y-4 text-lg text-slate-600">
+                    <p>Before we split anything, we need to know how impure (messy) our starting classroom is. We
+                        measure this using <strong>Entropy ($E$)</strong>.</p>
+
+                    <div
+                        class="bg-indigo-50 border-l-4 border-indigo-500 p-4 rounded-r-lg my-6 math-scroll overflow-x-auto">
+                        <p class="text-sm font-bold text-indigo-800 mb-2">Entropy Formula:</p>
+                        $$ E = - \sum_{i=1}^{c} p_i \cdot \log_2(p_i) $$
+                        <p class="text-xs text-indigo-600 mt-2 text-center">Where $p$ is the probability of a specific
+                            class (Pass or Fail).</p>
+                    </div>
+
+                    <p>Let's calculate the Entropy for our starting class of 15 students (9 Pass, 6 Fail):</p>
+
+                    <div class="bg-slate-100 p-5 rounded-xl math-scroll overflow-x-auto text-center font-medium">
+                        $$ E_{start} = - \left( \frac{9}{15} \log_2 \left(\frac{9}{15}\right) + \frac{6}{15} \log_2
+                        \left(\frac{6}{15}\right) \right) $$
+                        <br>
+                        $$ E_{start} \approx 0.971 $$
+                    </div>
+
+                    <p class="bg-amber-50 text-amber-800 p-4 rounded-lg border border-amber-200">
+                        <strong>What does this mean?</strong> Entropy goes from 0 (perfectly pure) to 1.0 (perfectly
+                        mixed). A score of <strong>0.971</strong> means our classroom is highly mixed and uncertain.
+                    </p>
+                </div>
+            </section>
+
+            <!-- PAGE 3: Information Gain -->
+            <section id="page-3" class="page-section hidden">
+                <div class="flex items-center gap-3 mb-6">
+                    <span class="text-4xl">📈</span>
+                    <h2 class="text-3xl font-bold text-slate-800">Step 1: Information Gain (IG)</h2>
+                </div>
+
+                <div class="space-y-4 text-lg text-slate-600">
+                    <p><strong>Information Gain</strong> measures how much impurity we <em>removed</em> by splitting the
+                        data.</p>
+
+                    <div class="bg-indigo-50 border-l-4 border-indigo-500 p-4 rounded-r-lg math-scroll overflow-x-auto">
+                        $$ IG = E_{start} - E_{new\_weighted} $$
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+                        <!-- Split A Breakdown -->
+                        <div class="bg-white border-2 border-slate-200 p-4 rounded-xl shadow-sm flex flex-col">
+                            <h4 class="font-bold text-indigo-600 border-b pb-2 mb-3">Split A: Attendance</h4>
+
+                            <div class="text-sm space-y-3 mb-4 flex-grow text-slate-600">
+                                <!-- Step 1 -->
+                                <div>
+                                    <p class="font-semibold text-slate-700">1. Group High (10 students: 8 Pass, 2 Fail)
+                                    </p>
+                                    <div
+                                        class="bg-slate-50 mt-1 p-2 rounded math-scroll overflow-x-auto text-center text-xs border border-slate-100">
+                                        $$ E_{high} = -[0.8\log_2(0.8) + 0.2\log_2(0.2)] \approx 0.722 $$
+                                    </div>
+                                </div>
+
+                                <!-- Step 2 -->
+                                <div>
+                                    <p class="font-semibold text-slate-700">2. Group Low (5 students: 1 Pass, 4 Fail)
+                                    </p>
+                                    <div
+                                        class="bg-slate-50 mt-1 p-2 rounded math-scroll overflow-x-auto text-center text-xs border border-slate-100">
+                                        $$ E_{low} = -[0.2\log_2(0.2) + 0.8\log_2(0.8)] \approx 0.722 $$
+                                    </div>
+                                </div>
+
+                                <!-- Step 3 -->
+                                <div>
+                                    <p class="font-semibold text-slate-700">3. Weighted Entropy</p>
+                                    <p class="text-xs mt-1">Multiply each entropy by the group's size ($10/15$ and
+                                        $5/15$):</p>
+                                    <div
+                                        class="bg-slate-50 mt-1 p-2 rounded math-scroll overflow-x-auto text-center text-xs border border-slate-100">
+                                        $$ E_{weighted} = \left(\frac{10}{15} \times 0.722\right) + \left(\frac{5}{15}
+                                        \times 0.722\right) = 0.722 $$
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Final IG Result -->
+                            <div class="bg-indigo-50 border border-indigo-200 p-3 rounded-lg text-center mt-auto">
+                                <span class="text-xs font-bold text-indigo-800 uppercase tracking-wider">Final
+                                    Calculation</span>
+                                $$ IG = 0.971 - 0.722 $$
+                                <strong class="text-indigo-700 text-xl block mt-1">IG = 0.249</strong>
+                            </div>
+                        </div>
+
+                        <!-- Split B Breakdown -->
+                        <div class="bg-white border-2 border-slate-200 p-4 rounded-xl shadow-sm flex flex-col">
+                            <h4 class="font-bold text-rose-600 border-b pb-2 mb-3">Split B: Student ID</h4>
+
+                            <div class="text-sm space-y-3 mb-4 flex-grow text-slate-600">
+                                <div>
+                                    <p class="font-semibold text-slate-700">1. The Groups (15 groups of 1 student)</p>
+                                    <div
+                                        class="bg-slate-50 mt-1 p-2 rounded math-scroll overflow-x-auto text-center text-xs border border-slate-100">
+                                        <p class="text-slate-500 mb-1">Each group is 100% pure (only 1 outcome
+                                            possible).</p>
+                                        $$ E_{each} = -[1\log_2(1) + 0] = 0 $$
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <p class="font-semibold text-slate-700">2. Weighted Entropy</p>
+                                    <p class="text-xs mt-1">Since every single group has an entropy of 0:</p>
+                                    <div
+                                        class="bg-slate-50 mt-1 p-2 rounded math-scroll overflow-x-auto text-center text-xs border border-slate-100">
+                                        $$ E_{weighted} = \sum_{i=1}^{15} \left(\frac{1}{15} \times 0\right) = 0 $$
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Final IG Result -->
+                            <div class="bg-rose-50 border border-rose-200 p-3 rounded-lg text-center mt-auto">
+                                <span class="text-xs font-bold text-rose-800 uppercase tracking-wider">Final
+                                    Calculation</span>
+                                $$ IG = 0.971 - 0 $$
+                                <strong class="text-rose-700 text-xl block mt-1">IG = 0.971</strong>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-rose-50 border border-rose-200 text-rose-800 p-4 rounded-lg mt-4">
+                        <strong>The Trap!</strong> If we only look at Information Gain, the Decision Tree will pick
+                        <strong>Student ID</strong> because it looks "perfect". But we know ID is useless for future
+                        predictions!
+                    </div>
+                </div>
+            </section>
+
+            <!-- PAGE 4: Split Information -->
+            <section id="page-4" class="page-section hidden">
+                <div class="flex items-center gap-3 mb-6">
+                    <span class="text-4xl">⚖️</span>
+                    <h2 class="text-3xl font-bold text-slate-800">Step 2: Split Information (SI)</h2>
+                </div>
+
+                <div class="space-y-4 text-lg text-slate-600">
+                    <p>To stop the tree from cheating, we use <strong>Split Information</strong>. This acts as a
+                        mathematical <em>penalty</em> for chopping the data into too many tiny pieces.</p>
+
+                    <div class="bg-indigo-50 border-l-4 border-indigo-500 p-4 rounded-r-lg math-scroll overflow-x-auto">
+                        <p class="text-sm font-bold text-indigo-800 mb-2">Split Information Formula:</p>
+                        $$ SI = - \sum \left( \frac{|Group|}{|Total|} \cdot \log_2 \left(\frac{|Group|}{|Total|}\right)
+                        \right) $$
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+                        <div class="bg-white border-2 border-slate-200 p-4 rounded-xl shadow-sm">
+                            <h4 class="font-bold text-indigo-600 border-b pb-2 mb-3">Split A: Attendance</h4>
+                            <p class="text-sm mb-2">Just 2 groups (10/15 and 5/15).</p>
+                            <div class="bg-slate-100 p-2 rounded text-center text-sm math-scroll overflow-x-auto">
+                                $$ - \left( \frac{10}{15}\log_2(\frac{10}{15}) + \frac{5}{15}\log_2(\frac{5}{15})
+                                \right) $$
+                                <strong class="text-indigo-700 text-lg">SI ≈ 0.918</strong>
+                                <br><span class="text-xs text-slate-500">(Low Penalty)</span>
+                            </div>
+                        </div>
+
+                        <div class="bg-white border-2 border-slate-200 p-4 rounded-xl shadow-sm">
+                            <h4 class="font-bold text-rose-600 border-b pb-2 mb-3">Split B: Student ID</h4>
+                            <p class="text-sm mb-2">15 groups (1/15 each).</p>
+                            <div class="bg-slate-100 p-2 rounded text-center text-sm math-scroll overflow-x-auto">
+                                $$ - \sum_{i=1}^{15} \left( \frac{1}{15}\log_2(\frac{1}{15}) \right) $$
+                                <strong class="text-rose-700 text-lg">SI ≈ 3.907</strong>
+                                <br><span class="text-xs text-rose-500 font-bold">(MASSIVE Penalty!)</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- PAGE 5: Gain Ratio -->
+            <section id="page-5" class="page-section hidden">
+                <div class="flex items-center gap-3 mb-6">
+                    <span class="text-4xl">🏆</span>
+                    <h2 class="text-3xl font-bold text-slate-800">Step 3: Gain Ratio (GR)</h2>
+                </div>
+
+                <div class="space-y-4 text-lg text-slate-600">
+                    <p>Finally, we calculate the <strong>Gain Ratio</strong>. It balances the purity gained against the
+                        penalty of fragmentation. This is the ultimate decider.</p>
+
+                    <div
+                        class="bg-teal-50 border-l-4 border-teal-500 p-4 rounded-r-lg math-scroll overflow-x-auto text-center">
+                        $$ Gain\ Ratio = \frac{Information\ Gain\ (IG)}{Split\ Information\ (SI)} $$
+                    </div>
+
+                    <div class="flex flex-col gap-4 mt-6">
+                        <!-- Attendance Winner -->
+                        <div
+                            class="bg-teal-600 text-white p-5 rounded-xl shadow-md flex flex-col sm:flex-row justify-between items-center gap-4">
+                            <div>
+                                <h4 class="font-bold text-xl flex items-center gap-2">⭐ Split A: Attendance (Winner)
+                                </h4>
+                                <p class="text-teal-100 text-sm mt-1">Good purity, very low penalty.</p>
+                            </div>
+                            <div class="bg-white text-teal-800 p-3 rounded-lg text-center font-bold min-w-[150px]">
+                                $$ GR = \frac{0.249}{0.918} $$
+                                <span class="text-xl mt-1 block">GR ≈ 0.271</span>
+                            </div>
+                        </div>
+
+                        <!-- Student ID Loser -->
+                        <div
+                            class="bg-slate-100 border-2 border-slate-300 p-5 rounded-xl flex flex-col sm:flex-row justify-between items-center gap-4 opacity-80">
+                            <div>
+                                <h4 class="font-bold text-slate-600 text-xl">Split B: Student ID (Rejected)</h4>
+                                <p class="text-slate-500 text-sm mt-1">Perfect purity destroyed by massive penalty.</p>
+                            </div>
+                            <div class="bg-slate-200 text-slate-700 p-3 rounded-lg text-center font-bold min-w-[150px]">
+                                $$ GR = \frac{0.971}{3.907} $$
+                                <span class="text-xl mt-1 block text-rose-600">GR ≈ 0.248</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- PAGE 6: Summary and What If -->
+            <section id="page-6" class="page-section hidden">
+                <div class="flex items-center gap-3 mb-6">
+                    <span class="text-4xl">💡</span>
+                    <h2 class="text-3xl font-bold text-slate-800">Conclusion & "What If?"</h2>
+                </div>
+
+                <div class="space-y-6 text-lg text-slate-600">
+
+                    <div class="bg-indigo-50 p-5 rounded-xl border border-indigo-100">
+                        <h3 class="font-bold text-indigo-800 mb-3 text-xl">The TL;DR Summary</h3>
+                        <ul class="space-y-2">
+                            <li>🎯 <strong>Information Gain:</strong> "How pure did the groups get?"</li>
+                            <li>⚠️ <strong>Split Information:</strong> "How aggressively did you chop the data to get
+                                that purity?"</li>
+                            <li>⚖️ <strong>Gain Ratio:</strong> "Was the purity actually worth the chopping?"</li>
+                        </ul>
+                    </div>
+
+                    <div>
+                        <h3 class="font-bold text-slate-800 mb-3 text-xl border-b pb-2">What if we didn't use Gain
+                            Ratio?</h3>
+                        <p class="mb-4">If we only relied on Information Gain, our model would have chosen
+                            <strong>Student ID</strong>. This causes a major Machine Learning problem called <strong
+                                class="text-rose-600">Overfitting</strong>.</p>
+
+                        <div class="flex items-start gap-4 bg-rose-50 p-4 rounded-lg">
+                            <span class="text-3xl mt-1">🚨</span>
+                            <div>
+                                <h4 class="font-bold text-rose-800">The Overfitting Disaster</h4>
+                                <p class="text-sm text-rose-700 mt-1">
+                                    The tree would memorize the training data. If Student ID #4 passed, the tree learns
+                                    "ID 4 = Pass."
+                                    <br><br>
+                                    But what happens next semester when a brand new student arrives with <strong>Student
+                                        ID #16</strong>? The tree crashes! It has never seen ID #16 and has no idea what
+                                    to do. It memorized the past instead of learning the underlying patterns (like
+                                    Attendance).
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <p class="text-center font-bold text-indigo-600 text-xl mt-8">By using Gain Ratio, we build smarter,
+                        more generalized AI!</p>
+                </div>
+            </section>
+
+        </div>
+
+        <!-- Footer / Navigation Controls -->
+        <footer class="bg-slate-100 border-t border-slate-200 p-4 sm:p-6 flex justify-between items-center mt-auto">
+            <button id="btn-back"
+                class="px-6 py-2.5 rounded-lg font-semibold text-slate-600 bg-white border border-slate-300 shadow-sm hover:bg-slate-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
+                ← Back
+            </button>
+            <button id="btn-next"
+                class="px-6 py-2.5 rounded-lg font-semibold text-white bg-indigo-600 shadow-md hover:bg-indigo-700 transition-colors">
+                Next Step →
+            </button>
+        </footer>
+
+    </main>
+
+    <script src="../js/decision_tree_splitting_quality.js"></script>
+</body>
+
+</html>

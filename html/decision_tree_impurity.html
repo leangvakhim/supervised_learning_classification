@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Decision Tree Impurity Visualizer</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f1f5f9;
+        }
+
+        .page {
+            display: none;
+            animation: fadeIn 0.5s ease-in-out;
+        }
+
+        .page.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .student-icon {
+            transition: transform 0.3s ease;
+        }
+
+        .student-icon:hover {
+            transform: scale(1.1);
+        }
+    </style>
+</head>
+
+<body class="min-h-screen flex items-center justify-center p-4 text-slate-800">
+
+    <main class="w-full max-w-4xl bg-white rounded-2xl shadow-xl overflow-hidden flex flex-col min-h-[600px]">
+
+        <!-- Progress Bar -->
+        <div class="bg-slate-50 border-b border-slate-100 px-8 py-4 flex justify-between items-center">
+            <h1 class="font-bold text-slate-700 tracking-tight">Understanding Decision Trees</h1>
+            <div class="flex space-x-2" id="progress-dots">
+                <div class="w-3 h-3 rounded-full bg-blue-500 transition-colors duration-300"></div>
+                <div class="w-3 h-3 rounded-full bg-slate-300 transition-colors duration-300"></div>
+                <div class="w-3 h-3 rounded-full bg-slate-300 transition-colors duration-300"></div>
+                <div class="w-3 h-3 rounded-full bg-slate-300 transition-colors duration-300"></div>
+                <div class="w-3 h-3 rounded-full bg-slate-300 transition-colors duration-300"></div>
+            </div>
+        </div>
+
+        <!-- Content Area -->
+        <div class="flex-grow p-8 md:p-12 relative overflow-y-auto">
+
+            <!-- Page 0: Intro -->
+            <div id="page-0" class="page active">
+                <div class="text-center mb-8">
+                    <h2 class="text-3xl font-bold text-slate-800 mb-4">The "Team Alpha" Dilemma</h2>
+                    <p class="text-lg text-slate-600 max-w-2xl mx-auto">
+                        Imagine you are a teacher organizing a collaborative coding project. You just grouped 5 students
+                        together into <strong>Team Alpha</strong>.
+                    </p>
+                </div>
+
+                <div class="flex justify-center items-center gap-6 mb-12 flex-wrap">
+                    <!-- 4 Coders -->
+                    <div class="flex flex-col items-center student-icon">
+                        <i class="fa-solid fa-user-astronaut text-5xl text-emerald-500 mb-2"></i>
+                        <span class="text-sm font-semibold text-emerald-600">Coder</span>
+                    </div>
+                    <div class="flex flex-col items-center student-icon">
+                        <i class="fa-solid fa-user-astronaut text-5xl text-emerald-500 mb-2"></i>
+                        <span class="text-sm font-semibold text-emerald-600">Coder</span>
+                    </div>
+                    <div class="flex flex-col items-center student-icon">
+                        <i class="fa-solid fa-user-astronaut text-5xl text-emerald-500 mb-2"></i>
+                        <span class="text-sm font-semibold text-emerald-600">Coder</span>
+                    </div>
+                    <div class="flex flex-col items-center student-icon">
+                        <i class="fa-solid fa-user-astronaut text-5xl text-emerald-500 mb-2"></i>
+                        <span class="text-sm font-semibold text-emerald-600">Coder</span>
+                    </div>
+                    <!-- 1 Beginner -->
+                    <div class="flex flex-col items-center student-icon">
+                        <i class="fa-solid fa-user-graduate text-5xl text-amber-500 mb-2"></i>
+                        <span class="text-sm font-semibold text-amber-600">Beginner</span>
+                    </div>
+                </div>
+
+                <div class="bg-blue-50 p-6 rounded-xl border border-blue-100 text-blue-900">
+                    <h3 class="font-bold mb-2"><i class="fa-solid fa-circle-question mr-2"></i> The Goal</h3>
+                    <p>
+                        This team is mostly homogeneous (pure), but not completely.
+                        A Decision Tree needs a mathematical way to score exactly <em>how mixed</em> this team is before
+                        it decides if it's a good grouping. Let's look at 3 ways it measures this "impurity".
+                    </p>
+                </div>
+            </div>
+
+            <!-- Page 1: Misclassification Error -->
+            <div id="page-1" class="page">
+                <div class="mb-8">
+                    <span class="text-sm font-bold text-blue-500 uppercase tracking-wider">Method 1 of 3</span>
+                    <h2 class="text-3xl font-bold text-slate-800 mt-1">Misclassification Error</h2>
+                    <p class="text-lg text-slate-600 mt-2">The "Majority Rules" Guess</p>
+                </div>
+
+                <div class="grid md:grid-cols-2 gap-8 items-center">
+                    <div>
+                        <p class="mb-4">
+                            <strong>The Logic:</strong> If you put on a blindfold, point to a random student in Team
+                            Alpha, and guess their skill based entirely on the <em>majority</em> (Coders), how often
+                            would you be wrong?
+                        </p>
+                        <ul class="space-y-3 text-slate-700">
+                            <li><i class="fa-solid fa-check text-emerald-500 mr-2"></i> Chance of pointing to a Coder:
+                                <strong>4 out of 5 (0.8)</strong></li>
+                            <li><i class="fa-solid fa-xmark text-amber-500 mr-2"></i> Chance of pointing to a Beginner:
+                                <strong>1 out of 5 (0.2)</strong></li>
+                        </ul>
+                    </div>
+
+                    <div class="bg-slate-50 p-6 rounded-xl border border-slate-200 text-center shadow-sm">
+                        <div class="text-sm text-slate-500 mb-2">The Math</div>
+                        <div class="mb-3 text-slate-800 text-lg overflow-x-auto">
+                            $$E = 1 - \max_i(p_i)$$
+                        </div>
+                        <div class="font-mono text-xl mb-4">
+                            E = 1 - <span class="text-emerald-500 font-bold">Max Probability</span>
+                        </div>
+                        <div
+                            class="font-mono text-2xl font-bold bg-white p-4 rounded-lg border border-slate-100 shadow-inner">
+                            E = 1 - 0.8 = <span class="text-rose-500">0.2</span>
+                        </div>
+                        <p class="text-sm text-slate-500 mt-4">
+                            The error rate is 20%. It's simple, but decision trees usually avoid this because it's too
+                            blunt and doesn't capture subtle changes well.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Page 2: Gini Impurity -->
+            <div id="page-2" class="page">
+                <div class="mb-8">
+                    <span class="text-sm font-bold text-blue-500 uppercase tracking-wider">Method 2 of 3</span>
+                    <h2 class="text-3xl font-bold text-slate-800 mt-1">Gini Impurity</h2>
+                    <p class="text-lg text-slate-600 mt-2">The "Random Pair Mismatch"</p>
+                </div>
+
+                <div class="grid md:grid-cols-2 gap-8 items-center">
+                    <div>
+                        <p class="mb-4">
+                            <strong>The Logic:</strong> If you randomly pick <em>two</em> students from Team Alpha, what
+                            are the chances they have <em>different</em> experience levels?
+                        </p>
+                        <p class="text-slate-700">
+                            Because there is one Beginner in the mix, there is a chance you will draw a mismatched pair.
+                            Gini calculates the probability of this collision. This is the most common metric used by
+                            algorithms like CART!
+                        </p>
+
+                        <div class="flex justify-center gap-4 mt-6">
+                            <i class="fa-solid fa-user-astronaut text-4xl text-emerald-500 opacity-50"></i>
+                            <i class="fa-solid fa-bolt text-3xl text-rose-400"></i>
+                            <i class="fa-solid fa-user-graduate text-4xl text-amber-500 opacity-50"></i>
+                        </div>
+                    </div>
+
+                    <div class="bg-slate-50 p-6 rounded-xl border border-slate-200 text-center shadow-sm">
+                        <div class="text-sm text-slate-500 mb-2">The Math</div>
+                        <div class="mb-3 text-slate-800 text-lg overflow-x-auto">
+                            $$G = 1 - \sum_{i=1}^{C} p_i^2$$
+                        </div>
+                        <div class="font-mono text-sm md:text-base mb-4 break-words">
+                            G = 1 - [ (<span class="text-emerald-500">P_coder</span>)² + (<span
+                                class="text-amber-500">P_beginner</span>)² ]
+                        </div>
+                        <div
+                            class="font-mono text-2xl font-bold bg-white p-4 rounded-lg border border-slate-100 shadow-inner">
+                            G = 1 - (0.8² + 0.2²) = <span class="text-rose-500">0.32</span>
+                        </div>
+                        <p class="text-sm text-slate-500 mt-4">
+                            The Gini impurity is 0.32. It is computationally fast (no heavy logarithms) and sensitive to
+                            changes!
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Page 3: Entropy -->
+            <div id="page-3" class="page">
+                <div class="mb-8">
+                    <span class="text-sm font-bold text-blue-500 uppercase tracking-wider">Method 3 of 3</span>
+                    <h2 class="text-3xl font-bold text-slate-800 mt-1">Entropy</h2>
+                    <p class="text-lg text-slate-600 mt-2">The "Chaos & Surprise" Meter</p>
+                </div>
+
+                <div class="grid md:grid-cols-2 gap-8 items-center">
+                    <div>
+                        <p class="mb-4">
+                            <strong>The Logic:</strong> Rooted in Information Theory. How much "surprise" or
+                            unpredictability is there when I randomly select a student?
+                        </p>
+                        <p class="text-slate-700">
+                            If everyone is a Coder, there is zero surprise. But that 1 Beginner introduces chaos into
+                            the system. Entropy measures how much "information" is needed to clean up that chaos.
+                        </p>
+
+                        <!-- Visual Chaos Meter -->
+                        <div class="mt-6">
+                            <div class="text-sm font-bold text-slate-500 mb-1 flex justify-between">
+                                <span>Pure (0.0)</span>
+                                <span>Max Chaos (1.0)</span>
+                            </div>
+                            <div class="w-full bg-slate-200 rounded-full h-4">
+                                <div class="bg-gradient-to-r from-emerald-400 to-rose-500 h-4 rounded-full"
+                                    style="width: 72%"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-slate-50 p-6 rounded-xl border border-slate-200 text-center shadow-sm">
+                        <div class="text-sm text-slate-500 mb-2">The Math</div>
+                        <div class="mb-3 text-slate-800 text-lg overflow-x-auto">
+                            $$H = -\sum_{i=1}^{C} p_i \log_2(p_i)$$
+                        </div>
+                        <div class="font-mono text-sm mb-4">
+                            H = -Σ [ P(x) * log₂(P(x)) ]
+                        </div>
+                        <div
+                            class="font-mono text-xl font-bold bg-white p-4 rounded-lg border border-slate-100 shadow-inner">
+                            H = -(0.8·log₂0.8 + 0.2·log₂0.2)<br>
+                            H ≈ <span class="text-rose-500">0.72</span>
+                        </div>
+                        <p class="text-sm text-slate-500 mt-4">
+                            Entropy penalizes mixed groups more harshly than Gini, which often forces the tree to build
+                            slightly more balanced groupings.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Page 4: Supervised Learning -->
+            <div id="page-4" class="page">
+                <div class="mb-6 text-center">
+                    <h2 class="text-3xl font-bold text-slate-800">Wait... What if we don't know the answers?</h2>
+                    <p class="text-lg text-slate-600 mt-2 max-w-2xl mx-auto">
+                        Questions: <em>"What if we have 5 students and we don't know if they have experience?"</em>
+                    </p>
+                </div>
+
+                <div class="bg-amber-50 border-l-4 border-amber-500 p-4 mb-8 text-amber-900 rounded-r-lg">
+                    <strong>The Golden Rule:</strong> To calculate Gini or Entropy, you <strong>MUST</strong> know the
+                    answers (who is a Coder and who is a Beginner). You cannot calculate math on an unknown!
+                </div>
+
+                <div class="grid md:grid-cols-2 gap-6">
+                    <!-- Phase 1 -->
+                    <div class="bg-white border-2 border-emerald-100 rounded-xl p-6 shadow-sm">
+                        <div class="flex items-center gap-3 mb-4">
+                            <div class="bg-emerald-100 p-3 rounded-full text-emerald-600">
+                                <i class="fa-solid fa-graduation-cap text-xl"></i>
+                            </div>
+                            <h3 class="text-xl font-bold text-slate-800">Phase 1: Training</h3>
+                        </div>
+                        <p class="text-sm text-slate-600 mb-3"><strong>Building the Tree</strong></p>
+                        <p class="text-slate-700">
+                            You feed the tree historical data where you <strong>already know the answers</strong>. The
+                            tree uses Gini/Entropy on this known data to discover the rules (e.g., "Math majors usually
+                            code").
+                        </p>
+                    </div>
+
+                    <!-- Phase 2 -->
+                    <div class="bg-white border-2 border-blue-100 rounded-xl p-6 shadow-sm">
+                        <div class="flex items-center gap-3 mb-4">
+                            <div class="bg-blue-100 p-3 rounded-full text-blue-600">
+                                <i class="fa-solid fa-wand-magic-sparkles text-xl"></i>
+                            </div>
+                            <h3 class="text-xl font-bold text-slate-800">Phase 2: Predicting</h3>
+                        </div>
+                        <p class="text-sm text-slate-600 mb-3"><strong>Using the Tree</strong></p>
+                        <p class="text-slate-700">
+                            Now you bring in your 5 <strong>unknown</strong> students. The tree asks them questions,
+                            follows the rules it learned in Phase 1, and makes a <strong>prediction</strong> about their
+                            experience!
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Footer Navigation -->
+        <div class="bg-slate-50 border-t border-slate-200 px-8 py-5 flex justify-between items-center">
+            <button id="btn-prev" onclick="changePage(-1)"
+                class="px-6 py-2.5 rounded-lg font-semibold text-slate-600 bg-white border border-slate-300 hover:bg-slate-100 transition-colors opacity-50 cursor-not-allowed disabled">
+                <i class="fa-solid fa-arrow-left mr-2"></i> Back
+            </button>
+            <button id="btn-next" onclick="changePage(1)"
+                class="px-6 py-2.5 rounded-lg font-semibold text-white bg-blue-600 hover:bg-blue-700 shadow-md transition-colors">
+                Next <i class="fa-solid fa-arrow-right ml-2"></i>
+            </button>
+        </div>
+    </main>
+
+    <script src="../js/decision_tree_impurity.js"></script>
+</body>
+
+</html>
